@@ -1,0 +1,808 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scale With Moosa — eCommerce Growth Agency Pakistan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','YOUR_PIXEL_ID');fbq('track','PageView');
+</script>
+<style>
+:root{
+  --bg:#050505;--bg2:#0d0d0d;--card:#131313;--card2:#181818;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --green:#00ff88;--gdim:rgba(0,255,136,0.1);--gglow:rgba(0,255,136,0.3);
+  --white:#fff;--gray:#888;--lgray:#bbb;
+  --f1:'Syne',sans-serif;--f2:'DM Sans',sans-serif;
+  --r:16px;--rs:8px;--max:1180px;
+  --ease:cubic-bezier(0.16,1,0.3,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--white);font-family:var(--f2);font-size:16px;line-height:1.6;overflow-x:hidden}
+::selection{background:var(--green);color:#000}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--green);border-radius:2px}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  opacity:.35}
+
+/* ── HEADER ── */
+#hdr{position:fixed;top:0;left:0;right:0;z-index:900;padding:20px 48px;
+  display:flex;align-items:center;justify-content:space-between;
+  transition:all .4s var(--ease)}
+#hdr.s{background:rgba(5,5,5,.94);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);padding:14px 48px}
+.logo{font-family:var(--f1);font-size:1.18rem;font-weight:800;
+  letter-spacing:-.03em;color:var(--white);text-decoration:none}
+.logo em{color:var(--green);font-style:normal}
+nav{display:flex;gap:32px;align-items:center}
+nav a{color:var(--gray);font-size:.85rem;text-decoration:none;
+  transition:color .2s;letter-spacing:.01em}
+nav a:hover{color:var(--white)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;
+  border-radius:50px;font-family:var(--f2);font-size:.85rem;font-weight:500;
+  text-decoration:none;cursor:pointer;transition:all .35s var(--ease);
+  border:none;outline:none;white-space:nowrap}
+.g-btn{background:var(--green);color:#000;font-weight:600}
+.g-btn:hover{background:#0f7;transform:translateY(-1px);box-shadow:0 8px 30px var(--gglow)}
+.o-btn{background:transparent;color:var(--white);border:1px solid var(--border2)}
+.o-btn:hover{background:rgba(255,255,255,.05);transform:translateY(-1px)}
+.w-btn{background:#25d366;color:#fff;font-weight:600}
+.w-btn:hover{background:#1db954;transform:translateY(-2px);box-shadow:0 10px 36px rgba(37,211,102,.35)}
+
+/* ── HERO ── */
+#hero{min-height:100vh;display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;padding:130px 48px 80px;text-align:center}
+.hbg{position:absolute;inset:0;
+  background:radial-gradient(ellipse 90% 55% at 50% -5%,rgba(0,255,136,.09),transparent 65%)}
+.hgrid{position:absolute;inset:0;
+  background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);
+  background-size:56px 56px;
+  mask-image:radial-gradient(ellipse 100% 100% at 50% 0%,black 10%,transparent 75%)}
+.orb{position:absolute;border-radius:50%;pointer-events:none;filter:blur(90px)}
+.o1{width:600px;height:600px;top:-150px;left:50%;transform:translateX(-50%);
+  background:radial-gradient(circle,rgba(0,255,136,.12),transparent 65%);
+  animation:float1 9s ease-in-out infinite}
+.o2{width:280px;height:280px;bottom:15%;right:8%;
+  background:radial-gradient(circle,rgba(0,180,255,.07),transparent 65%);
+  animation:float1 7s ease-in-out infinite reverse}
+.o3{width:200px;height:200px;bottom:25%;left:6%;
+  background:radial-gradient(circle,rgba(140,0,255,.05),transparent 65%);
+  animation:float1 11s ease-in-out infinite}
+@keyframes float1{0%,100%{transform:translateY(0)}50%{transform:translateY(-28px)}}
+.o1{animation-name:float1c}
+@keyframes float1c{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-28px)}}
+
+.hcontent{position:relative;z-index:1;max-width:920px;margin:0 auto}
+.badge{display:inline-flex;align-items:center;gap:8px;
+  background:var(--gdim);border:1px solid rgba(0,255,136,.22);border-radius:50px;
+  padding:6px 18px;font-size:.74rem;font-weight:600;color:var(--green);
+  letter-spacing:.07em;text-transform:uppercase;margin-bottom:36px;
+  animation:fadeup .8s both}
+.badge .dot{width:6px;height:6px;background:var(--green);border-radius:50%;
+  animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.6)}}
+
+h1{font-family:var(--f1);font-size:clamp(3rem,6.5vw,5.8rem);font-weight:800;
+  line-height:.98;letter-spacing:-.045em;margin-bottom:28px;
+  animation:fadeup .8s .1s both}
+h1 .g{color:var(--green)}
+h1 .ghost{-webkit-text-stroke:1px rgba(255,255,255,.28);color:transparent}
+.hsub{font-size:1.1rem;color:var(--lgray);font-weight:300;max-width:520px;
+  margin:0 auto 44px;line-height:1.75;animation:fadeup .8s .2s both}
+.hbtns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;
+  animation:fadeup .8s .3s both}
+.hbtns .btn{padding:14px 30px;font-size:.95rem}
+
+.hstats{display:grid;grid-template-columns:repeat(4,1fr);
+  gap:0;margin-top:72px;border:1px solid var(--border);border-radius:var(--r);
+  overflow:hidden;animation:fadeup .8s .45s both}
+.hstat{padding:28px 20px;text-align:center;border-right:1px solid var(--border);
+  background:rgba(255,255,255,.015)}
+.hstat:last-child{border-right:none}
+.hstat-n{font-family:var(--f1);font-size:1.9rem;font-weight:800;
+  color:var(--green);letter-spacing:-.04em;line-height:1}
+.hstat-l{font-size:.75rem;color:var(--gray);margin-top:5px;
+  text-transform:uppercase;letter-spacing:.06em}
+@keyframes fadeup{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+
+/* ── TICKER ── */
+.tbox{overflow:hidden;position:relative;
+  background:var(--card);border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);padding:15px 0}
+.tbox::before,.tbox::after{content:'';position:absolute;top:0;bottom:0;width:100px;z-index:2}
+.tbox::before{left:0;background:linear-gradient(90deg,var(--card),transparent)}
+.tbox::after{right:0;background:linear-gradient(-90deg,var(--card),transparent)}
+.ttrack{display:flex;animation:tick 28s linear infinite;width:max-content}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.ti{display:inline-flex;align-items:center;gap:10px;padding:0 36px;
+  white-space:nowrap;font-size:.84rem;color:var(--lgray)}
+.ti strong{color:var(--green);font-weight:600}
+.ti .d{color:var(--border);font-size:1.4rem}
+
+/* ── SECTIONS ── */
+.sec{padding:88px 48px;max-width:var(--max);margin:0 auto}
+.full-sec{padding:88px 48px}
+.full-sec .inner{max-width:var(--max);margin:0 auto}
+.stag{display:inline-flex;align-items:center;gap:8px;
+  font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--green);margin-bottom:14px}
+.stag::before{content:'';width:16px;height:1px;background:var(--green)}
+h2{font-family:var(--f1);font-size:clamp(2rem,3.8vw,3.1rem);font-weight:800;
+  letter-spacing:-.04em;line-height:1.06;margin-bottom:14px}
+h2 .g{color:var(--green)}
+.slead{font-size:1rem;color:var(--lgray);font-weight:300;
+  max-width:520px;line-height:1.75}
+
+/* ── PROOF ── */
+.pgrid{display:grid;grid-template-columns:repeat(4,1fr);
+  gap:2px;margin-top:56px;border:1px solid var(--border);
+  border-radius:var(--r);overflow:hidden}
+.pc{background:var(--card);padding:36px 24px;text-align:center;transition:background .3s}
+.pc:hover{background:rgba(0,255,136,.04)}
+.pn{font-family:var(--f1);font-size:2.8rem;font-weight:800;
+  color:var(--green);letter-spacing:-.04em;line-height:1}
+.pl{font-size:.78rem;color:var(--gray);margin-top:8px;
+  text-transform:uppercase;letter-spacing:.06em}
+.ba{display:grid;grid-template-columns:1fr auto 1fr;gap:20px;
+  align-items:center;margin-top:48px}
+.bac{background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);padding:28px 24px;text-align:center;transition:all .3s}
+.bac.af{border-color:rgba(0,255,136,.25);background:rgba(0,255,136,.03)}
+.bacl{font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;
+  color:var(--gray);margin-bottom:10px}
+.bac.af .bacl{color:var(--green)}
+.bacn{font-family:var(--f1);font-size:2.1rem;font-weight:800;letter-spacing:-.03em}
+.bacs{font-size:.8rem;color:var(--gray);margin-top:4px}
+.barr{font-size:2rem;color:var(--green);animation:arr 1.6s ease-in-out infinite}
+@keyframes arr{0%,100%{transform:translateX(0)}50%{transform:translateX(6px)}}
+
+/* ── SERVICES ── */
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;
+  margin-top:56px;border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.sc{background:var(--card);padding:36px 28px;position:relative;
+  overflow:hidden;transition:all .4s var(--ease)}
+.sc::before{content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(0,255,136,.08),transparent);
+  opacity:0;transition:opacity .4s}
+.sc:hover{transform:translateY(-4px);z-index:1}
+.sc:hover::before{opacity:1}
+.si{font-size:2rem;margin-bottom:18px;display:block;transition:transform .3s}
+.sc:hover .si{transform:scale(1.1) rotate(-5deg)}
+.sct{font-family:var(--f1);font-size:1.08rem;font-weight:700;margin-bottom:10px;
+  letter-spacing:-.02em}
+.scd{font-size:.84rem;color:var(--gray);line-height:1.65}
+.scl{display:inline-block;margin-top:18px;font-size:.7rem;text-transform:uppercase;
+  letter-spacing:.09em;color:var(--green);opacity:0;transform:translateY(8px);
+  transition:all .35s var(--ease)}
+.sc:hover .scl{opacity:1;transform:none}
+
+/* ── HOW IT WORKS ── */
+.hgrid2{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;
+  margin-top:56px;position:relative}
+.hgrid2::before{content:'';position:absolute;
+  top:48px;left:13%;right:13%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--green) 20%,var(--green) 80%,transparent);
+  opacity:.2;z-index:0}
+.stc{background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);padding:32px 24px;text-align:center;
+  position:relative;z-index:1;transition:all .4s var(--ease)}
+.stc:hover{border-color:rgba(0,255,136,.3);transform:translateY(-5px);
+  box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.stn{width:48px;height:48px;background:var(--gdim);
+  border:1px solid rgba(0,255,136,.22);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--f1);font-size:.9rem;font-weight:800;color:var(--green);
+  margin:0 auto 20px}
+.stt{font-family:var(--f1);font-size:1rem;font-weight:700;margin-bottom:8px}
+.std{font-size:.82rem;color:var(--gray);line-height:1.65}
+
+/* ── PRODUCTS ── */
+.playout{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:56px}
+.pcard{border-radius:20px;border:1px solid var(--border);overflow:hidden;
+  transition:all .4s var(--ease)}
+.pcard:hover{transform:translateY(-5px)}
+.pcard.free{background:linear-gradient(160deg,var(--card) 0%,rgba(0,255,136,.05) 100%);
+  border-color:rgba(0,255,136,.18)}
+.pcard.paid{background:var(--card)}
+.ph{padding:36px 36px 0}
+.pbadge{display:inline-block;padding:4px 14px;border-radius:50px;
+  font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px}
+.pbadge.free{background:var(--gdim);color:var(--green);border:1px solid rgba(0,255,136,.22)}
+.pbadge.paid{background:rgba(255,200,0,.08);color:#ffc800;border:1px solid rgba(255,200,0,.2)}
+.ptitle{font-family:var(--f1);font-size:1.32rem;font-weight:800;
+  letter-spacing:-.03em;margin-bottom:10px}
+.pdesc{font-size:.875rem;color:var(--lgray);line-height:1.7;margin-bottom:26px}
+.feats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:24px}
+.feat{background:rgba(0,255,136,.06);border:1px solid rgba(0,255,136,.12);
+  border-radius:var(--rs);padding:9px 10px;font-size:.76rem;color:var(--green);
+  text-align:center}
+.lform{padding:0 36px 36px}
+.fi{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);
+  border-radius:var(--rs);padding:12px 16px;color:var(--white);
+  font-family:var(--f2);font-size:.875rem;margin-bottom:10px;
+  transition:border-color .25s;outline:none}
+.fi:focus{border-color:rgba(0,255,136,.4)}
+.fi::placeholder{color:var(--gray)}
+.pvars{padding:0 36px 36px}
+.vitem{border:1px solid var(--border);border-radius:var(--rs);
+  margin-bottom:10px;overflow:hidden;transition:border-color .25s}
+.vitem.open{border-color:rgba(0,255,136,.28)}
+.vhead{padding:15px 18px;display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;background:rgba(255,255,255,.02);transition:background .2s}
+.vhead:hover{background:rgba(255,255,255,.04)}
+.vname{font-weight:600;font-size:.88rem}
+.vprice{color:var(--green);font-family:var(--f1);font-weight:700;font-size:.92rem}
+.vchev{color:var(--gray);font-size:.75rem;transition:transform .3s}
+.vitem.open .vchev{transform:rotate(180deg)}
+.vbody{max-height:0;overflow:hidden;padding:0 18px;
+  transition:max-height .4s var(--ease),padding .3s;
+  background:rgba(0,255,136,.02);font-size:.83rem;color:var(--gray);line-height:1.65}
+.vitem.open .vbody{max-height:200px;padding:14px 18px}
+
+/* ── CASE STUDIES ── */
+.cgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:56px}
+.ccard{background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);overflow:hidden;transition:all .4s var(--ease)}
+.ccard:hover{transform:translateY(-7px);border-color:rgba(0,255,136,.22);
+  box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.cimg{height:160px;background:linear-gradient(135deg,#1a1a1a,#0a0a0a);
+  display:flex;align-items:center;justify-content:center;font-size:3rem;
+  position:relative;overflow:hidden}
+.cimg::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.75))}
+.cbody{padding:22px}
+.ctitle{font-family:var(--f1);font-size:.98rem;font-weight:700;margin-bottom:6px}
+.cmeta{font-size:.78rem;color:var(--gray);margin-bottom:14px}
+.cres{display:flex;gap:12px}
+.cm{flex:1;background:var(--gdim);border:1px solid rgba(0,255,136,.14);
+  border-radius:var(--rs);padding:10px;text-align:center}
+.cmn{font-family:var(--f1);font-size:1.05rem;font-weight:800;color:var(--green)}
+.cml{font-size:.7rem;color:var(--gray);margin-top:2px}
+
+/* ── TESTIMONIALS ── */
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:56px}
+.tcard{background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);padding:26px;transition:all .4s var(--ease)}
+.tcard:hover{border-color:rgba(0,255,136,.18);transform:translateY(-4px)}
+.tstars{color:#ffc800;font-size:.78rem;margin-bottom:8px}
+.tq{font-size:1.8rem;color:var(--green);line-height:1;font-family:Georgia,serif;margin-bottom:14px}
+.tt{font-size:.85rem;color:var(--lgray);line-height:1.72;margin-bottom:22px;font-style:italic}
+.tau{display:flex;align-items:center;gap:12px}
+.tav{width:38px;height:38px;border-radius:50%;background:var(--gdim);
+  border:1px solid rgba(0,255,136,.2);display:flex;align-items:center;
+  justify-content:center;font-family:var(--f1);font-weight:700;
+  font-size:.85rem;color:var(--green)}
+.tanm{font-weight:600;font-size:.86rem}
+.tarl{font-size:.76rem;color:var(--gray)}
+
+/* ── BIG CTA ── */
+#cta{background:var(--bg2);border-top:1px solid var(--border);
+  padding:100px 48px;text-align:center;position:relative;overflow:hidden}
+#cta::before{content:'';position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);width:700px;height:350px;
+  background:radial-gradient(ellipse,rgba(0,255,136,.06),transparent 70%);
+  pointer-events:none}
+#cta .inner{max-width:680px;margin:0 auto;position:relative;z-index:1}
+#cta h2{font-size:clamp(2.2rem,4vw,3.4rem)}
+#cta p{font-size:1rem;color:var(--lgray);margin:16px 0 40px;font-weight:300;line-height:1.75}
+.cbtns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.cbtns .btn{padding:16px 34px;font-size:.98rem}
+
+/* ── FOOTER ── */
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:64px 48px 40px}
+.fi2{max-width:var(--max);margin:0 auto;display:grid;
+  grid-template-columns:1.6fr 1fr 1fr;gap:60px}
+.flogo{font-family:var(--f1);font-size:1.2rem;font-weight:800;
+  letter-spacing:-.03em;color:var(--white);text-decoration:none;display:block;margin-bottom:14px}
+.flogo em{color:var(--green);font-style:normal}
+.fdesc{font-size:.85rem;color:var(--gray);line-height:1.75;max-width:270px}
+.fsoc{display:flex;gap:10px;margin-top:22px}
+.sb{width:38px;height:38px;background:rgba(255,255,255,.04);
+  border:1px solid var(--border);border-radius:var(--rs);
+  display:flex;align-items:center;justify-content:center;
+  text-decoration:none;color:var(--gray);font-size:.95rem;transition:all .3s}
+.sb:hover{background:var(--gdim);color:var(--green);border-color:rgba(0,255,136,.28)}
+.fcol h4{font-family:var(--f1);font-size:.8rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.09em;color:var(--white);margin-bottom:20px}
+.flinks{list-style:none}
+.flinks li{margin-bottom:10px}
+.flinks a{color:var(--gray);font-size:.85rem;text-decoration:none;transition:color .2s}
+.flinks a:hover{color:var(--green)}
+.fbot{max-width:var(--max);margin:44px auto 0;padding-top:22px;
+  border-top:1px solid var(--border);display:flex;align-items:center;
+  justify-content:space-between;flex-wrap:wrap;gap:10px}
+.fbot p{font-size:.78rem;color:var(--gray)}
+.fbot a{color:var(--green);text-decoration:none}
+
+/* ── FLOATING WA ── */
+.fwa{position:fixed;bottom:26px;right:26px;width:56px;height:56px;
+  background:#25d366;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:1.5rem;text-decoration:none;z-index:800;
+  box-shadow:0 4px 22px rgba(37,211,102,.4);transition:all .3s;
+  animation:wap 3s ease-in-out infinite}
+.fwa:hover{transform:scale(1.12)}
+@keyframes wap{0%,100%{box-shadow:0 4px 22px rgba(37,211,102,.4)}
+  50%{box-shadow:0 4px 40px rgba(37,211,102,.7)}}
+
+/* ── MODAL ── */
+.mover{position:fixed;inset:0;background:rgba(0,0,0,.88);
+  backdrop-filter:blur(10px);z-index:1000;display:flex;align-items:center;
+  justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s}
+.mover.on{opacity:1;pointer-events:all}
+.mdl{background:var(--bg2);border:1px solid var(--border2);border-radius:22px;
+  padding:46px;max-width:460px;width:100%;position:relative;
+  transform:scale(.94) translateY(12px);transition:transform .4s var(--ease)}
+.mover.on .mdl{transform:scale(1) translateY(0)}
+.mclose{position:absolute;top:18px;right:18px;width:30px;height:30px;
+  background:rgba(255,255,255,.05);border:1px solid var(--border);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--gray);font-size:.9rem;transition:all .2s}
+.mclose:hover{color:var(--white);background:rgba(255,255,255,.1)}
+.mdl h3{font-family:var(--f1);font-size:1.55rem;font-weight:800;
+  letter-spacing:-.03em;margin-bottom:8px}
+.mdl .sub{font-size:.88rem;color:var(--gray);margin-bottom:26px}
+.sstate{text-align:center;display:none}
+.sico{font-size:2.8rem;margin-bottom:14px}
+.sstate h3{color:var(--green)}
+
+/* ── SCROLL REVEAL ── */
+.rv{opacity:0;transform:translateY(36px);
+  transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.rv.in{opacity:1;transform:none}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}
+.d3{transition-delay:.3s}.d4{transition-delay:.4s}
+
+/* ── MOBILE ── */
+@media(max-width:960px){
+  #hdr{padding:16px 20px}nav{display:none}
+  #hero{padding:110px 20px 60px}
+  .hstats{grid-template-columns:repeat(2,1fr)}
+  .sec,.full-sec{padding:64px 20px}
+  .playout{grid-template-columns:1fr}
+  .cgrid,.tgrid{grid-template-columns:1fr}
+  .hgrid2{grid-template-columns:repeat(2,1fr)}
+  .hgrid2::before{display:none}
+  .fi2{grid-template-columns:1fr;gap:36px}
+  footer{padding:52px 20px 32px}
+  #cta{padding:72px 20px}
+  .ba{grid-template-columns:1fr;text-align:center}
+  .barr{transform:rotate(90deg)}
+  .pgrid{grid-template-columns:repeat(2,1fr)}
+  .sgrid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:580px){
+  h1{font-size:2.5rem}
+  .hstats{grid-template-columns:repeat(2,1fr)}
+  .hgrid2{grid-template-columns:1fr}
+  .mdl{padding:30px 22px}
+  .sgrid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<a href="https://wa.me/923284138310" target="_blank" class="fwa" onclick="fbq('track','Contact',{content_name:'float_wa'})">💬</a>
+
+<!-- MODAL -->
+<div class="mover" id="modal">
+  <div class="mdl">
+    <div class="mclose" onclick="cmodal()">✕</div>
+    <div id="mf">
+      <div class="pbadge free" style="margin-bottom:18px">Free Download</div>
+      <h3>Get Your Free<br>eCommerce Ads Guide</h3>
+      <div class="sub">Pakistan COD model — the exact ad strategy that generates 8M+ monthly.</div>
+      <input class="fi" id="mn" type="text" placeholder="Your Name"/>
+      <input class="fi" id="mw" type="tel" placeholder="WhatsApp (03XXXXXXXXX)"/>
+      <button class="btn g-btn" style="width:100%;justify-content:center;padding:14px" onclick="subm()">📥 Get Free Guide</button>
+      <p style="font-size:.76rem;color:var(--gray);text-align:center;margin-top:10px">500+ sellers already have this guide</p>
+    </div>
+    <div class="sstate" id="ms">
+      <div class="sico">✅</div>
+      <h3>Guide is Downloaded!</h3>
+      <p style="color:var(--gray);margin-bottom:22px;font-size:.88rem">If GUIDE is not downloaded. Moosa will personally send you the guide on WhatsApp.</p>
+      <a href="https://wa.me/923284138310?text=Hi%20Moosa!%20I%20just%20requested%20the%20free%20guide." target="_blank" class="btn w-btn" style="width:100%;justify-content:center;padding:14px;font-size:.92rem">💬 Message Moosa Now</a>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header id="hdr">
+  <a href="#" class="logo">Scale<em>WithMoosa</em></a>
+  <nav>
+    <a href="#services">Services</a>
+    <a href="#products">Products</a>
+    <a href="#results">Results</a>
+    <a href="#how">Process</a>
+    <a href="#reviews">Reviews</a>
+  </nav>
+  <a href="https://wa.me/923284138310?text=Hi%20Moosa%2C%20I%20want%20to%20book%20a%20free%20strategy%20call" target="_blank" class="btn g-btn" onclick="fbq('track','Contact',{content_name:'header_cta'})">Book Free Call →</a>
+</header>
+
+<!-- HERO -->
+<section id="hero" style="max-width:100%">
+  <div class="hbg"></div><div class="hgrid"></div>
+  <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
+  <div class="hcontent">
+    <div class="badge"><span class="dot"></span>Pakistan's #1 eCommerce Growth Agency</div>
+    <h1>We Turn eCom<br>Stores Into<br><span class="g">Profitable</span> <span class="ghost">Machines</span></h1>
+    <p class="hsub">From product hunting to full-scale Meta Ads — a complete system built specifically for Pakistan's COD model that generates consistent daily profits.</p>
+    <div class="hbtns">
+      <button class="btn g-btn" onclick="omodal()">📥 Get Free Ads Guide</button>
+      <a href="https://wa.me/923284138310?text=Hi%20Moosa%2C%20I%20want%20a%20free%20consultation" target="_blank" class="btn o-btn" onclick="fbq('track','Contact',{content_name:'hero_wa'})">💬 Book Free Consultation</a>
+    </div>
+    <div class="hstats">
+      <div class="hstat"><div class="hstat-n" data-target="8" data-suf="M+">0</div><div class="hstat-l">Sales in 25 Days</div></div>
+      <div class="hstat"><div class="hstat-n" data-target="100" data-suf="+">0</div><div class="hstat-l">Brands Scaled</div></div>
+      <div class="hstat"><div class="hstat-n" data-target="340" data-suf="%">0</div><div class="hstat-l">Avg ROAS</div></div>
+      <div class="hstat"><div class="hstat-n" data-target="4" data-suf="+ Yrs">0</div><div class="hstat-l">Experience</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="tbox"><div class="ttrack" id="tk"></div></div>
+
+<!-- PROOF -->
+<div class="full-sec" id="proof" style="background:var(--card);border-bottom:1px solid var(--border)">
+  <div class="inner">
+    <div class="stag rv">Real Results</div>
+    <h2 class="rv">No Fake Numbers.<br><span class="g">Just Proof.</span></h2>
+    <p class="slead rv">Every number shown below is from real clients. No inflated screenshots. No fake DMs. Just what the system actually delivers.</p>
+    <div class="pgrid rv">
+      <div class="pc"><div class="pn" data-target="8" data-suf="M+">0</div><div class="pl">PKR Sales in 25 Days</div></div>
+      <div class="pc"><div class="pn" data-target="340" data-suf="%">0</div><div class="pl">Average ROAS</div></div>
+      <div class="pc"><div class="pn" data-target="100" data-suf="+">0</div><div class="pl">Profitable Brands</div></div>
+      <div class="pc"><div class="pn" data-target="98" data-suf="%">0</div><div class="pl">Client Retention</div></div>
+    </div>
+    <div class="ba rv">
+      <div class="bac">
+        <div class="bacl">❌ Before Working With Moosa</div>
+        <div class="bacn" style="color:var(--gray)">₨180K</div>
+        <div class="bacs">Monthly Revenue</div>
+        <div style="margin-top:12px;font-size:.8rem;color:var(--gray)">Burning ad budget, random testing, no system, no profit</div>
+      </div>
+      <div class="barr">→</div>
+      <div class="bac af">
+        <div class="bacl">✅ After Scale With Moosa</div>
+        <div class="bacn" style="color:var(--green)">₨3.2M</div>
+        <div class="bacs">Monthly Revenue</div>
+        <div style="margin-top:12px;font-size:.8rem;color:var(--gray)">Systematic scaling, 340% ROAS, profitable every month</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SERVICES -->
+<section class="sec" id="services">
+  <div class="stag rv">What We Do</div>
+  <h2 class="rv">A Full-Stack<br><span class="g">Growth Operation</span></h2>
+  <p class="slead rv">Not just ad management. A complete eCommerce growth system — from sourcing to scaling — that runs like a profit machine.</p>
+  <div class="sgrid rv">
+    <div class="sc"><span class="si">🔍</span><div class="sct">Product Hunting System</div><div class="scd">Data-driven research to find high-demand, low-competition products built for Pakistan's COD market — not guesswork.</div><div class="scl">Find Winners →</div></div>
+    <div class="sc"><span class="si">📱</span><div class="sct">Meta Ads Management</div><div class="scd">Full-funnel Meta campaigns built around the COD model. We test, optimize, and scale ruthlessly — cutting waste fast.</div><div class="scl">Profitable Ads →</div></div>
+    <div class="sc"><span class="si">🎨</span><div class="sct">Creative Strategy</div><div class="scd">High-converting scripts, hooks, and creatives tailored for Pakistani audiences that stop the scroll and drive orders.</div><div class="scl">Better Creatives →</div></div>
+    <div class="sc"><span class="si">🚀</span><div class="sct">Scaling & Optimization</div><div class="scd">Once we find a winner, we push it hard. Budget scaling frameworks, audience expansion, and ROAS protection — all in one.</div><div class="scl">Scale Fast →</div></div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<div class="full-sec" id="how" style="background:var(--card);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="inner">
+    <div class="stag rv">The Process</div>
+    <h2 class="rv">4 Steps to Building<br><span class="g">Your Profit Engine</span></h2>
+    <p class="slead rv">A repeatable, proven system that takes any eCommerce brand from struggling to scaling — fast.</p>
+    <div class="hgrid2">
+      <div class="stc rv d1"><div class="stn">01</div><div class="stt">Product Hunt</div><div class="std">We identify winning products with real demand in Pakistan's COD market using our proprietary research framework.</div></div>
+      <div class="stc rv d2"><div class="stn">02</div><div class="stt">Testing</div><div class="std">Structured ad testing with micro-budgets to find winning creatives and audiences fast — minimal risk, maximum data.</div></div>
+      <div class="stc rv d3"><div class="stn">03</div><div class="stt">Scaling</div><div class="std">Aggressive but controlled budget scaling on proven winners. We push hard while keeping your ROAS protected.</div></div>
+      <div class="stc rv d4"><div class="stn">04</div><div class="stt">Profit</div><div class="std">Systematic daily profits with optimized ad spend, creative refreshes, and continuous performance monitoring.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCTS -->
+<section class="sec" id="products">
+  <div class="stag rv">Digital Products</div>
+  <h2 class="rv">Learn The System<br><span class="g">At Any Level</span></h2>
+  <p class="slead rv">Start with the free guide or go all-in with the complete system. Either way, you get a clear blueprint to build a profitable eCom brand in Pakistan.</p>
+  <div class="playout">
+    <!-- FREE -->
+    <div class="pcard free rv">
+      <div class="ph">
+        <div class="pbadge free">🎁 100% Free</div>
+        <div class="ptitle">Free eCommerce Ads Guide<br>(Pakistan COD Model)</div>
+        <div class="pdesc">A comprehensive PDF guide covering the exact Meta Ads strategy Moosa uses for Pakistan's COD dropshipping model. Learn campaign setup, targeting, budgets, and how to get your first profitable orders without wasting money.</div>
+        <div class="feats">
+          <div class="feat">✓ Campaign setup</div>
+          <div class="feat">✓ COD strategy</div>
+          <div class="feat">✓ Audience targeting</div>
+          <div class="feat">✓ Budget tips</div>
+          <div class="feat">✓ Creative guide</div>
+          <div class="feat">✓ Scaling basics</div>
+        </div>
+      </div>
+      <div class="lform">
+        <input class="fi" id="in" type="text" placeholder="Your Name"/>
+        <input class="fi" id="iw" type="tel" placeholder="WhatsApp Number (03XXXXXXXXX)"/>
+        <button class="btn g-btn" style="width:100%;justify-content:center;padding:14px" onclick="subinline()">📥 Download Free Guide — Zero Cost</button>
+        <p style="font-size:.74rem;color:var(--gray);text-align:center;margin-top:10px">500+ eCom sellers already use this guide. Join them for free.</p>
+      </div>
+    </div>
+    <!-- PAID -->
+    <div class="pcard paid rv d2">
+      <div class="ph">
+        <div class="pbadge paid">⚡ Premium System</div>
+        <div class="ptitle">Complete eCommerce<br>Profit System (40+ Pages)</div>
+        <div class="pdesc">The complete blueprint in one comprehensive guide. Every framework, template, and strategy Moosa uses with paying clients. Choose the level that matches your stage — from first test to 7-figure scaling.</div>
+      </div>
+      <div class="pvars">
+        <div class="vitem" id="v1">
+          <div class="vhead" onclick="togv('v1')">
+            <div><div class="vname">📋 Testing Guide</div><div style="font-size:.76rem;color:var(--gray);margin-top:2px">For beginners launching first campaigns</div></div>
+            <div style="display:flex;align-items:center;gap:10px"><div class="vprice">₨999</div><div class="vchev">▼</div></div>
+          </div>
+          <div class="vbody">Master the exact testing framework to find winning products and creatives without burning your budget. Includes ad structure, budget allocation, KPIs, and metrics interpretation.
+          <br><br><a href="https://wa.me/923284138310?text=Hi%20Moosa!%20I%20want%20the%20Testing%20Guide%20for%20Rs999" target="_blank" class="btn g-btn" style="font-size:.82rem;padding:10px 18px;margin-top:4px" onclick="fbq('track','InitiateCheckout',{value:999,currency:'PKR',content_name:'testing_guide'})">Buy Testing Guide — ₨999</a>
+          </div>
+        </div>
+        <div class="vitem" id="v2">
+          <div class="vhead" onclick="togv('v2')">
+            <div><div class="vname">📈 Scaling Guide</div><div style="font-size:.76rem;color:var(--gray);margin-top:2px">For sellers ready to scale past ₨500K/mo</div></div>
+            <div style="display:flex;align-items:center;gap:10px"><div class="vprice">₨1,499</div><div class="vchev">▼</div></div>
+          </div>
+          <div class="vbody">Advanced scaling techniques, budget doubling strategies, audience expansion playbooks, and ROAS protection methods. This is how Moosa generates 8M+ in under 30 days.
+          <br><br><a href="https://wa.me/923284138310?text=Hi%20Moosa!%20I%20want%20the%20Scaling%20Guide%20for%20Rs1499" target="_blank" class="btn g-btn" style="font-size:.82rem;padding:10px 18px;margin-top:4px" onclick="fbq('track','InitiateCheckout',{value:1499,currency:'PKR',content_name:'scaling_guide'})">Buy Scaling Guide — ₨1,499</a>
+          </div>
+        </div>
+        <div class="vitem" id="v3" style="border-color:rgba(0,255,136,.22)">
+          <div class="vhead" onclick="togv('v3')" style="background:rgba(0,255,136,.03)">
+            <div>
+              <div class="vname">🏆 Complete Bundle <span style="font-size:.68rem;background:var(--green);color:#000;padding:2px 8px;border-radius:50px;margin-left:6px;font-weight:700">BEST VALUE</span></div>
+              <div style="font-size:.76rem;color:var(--gray);margin-top:2px">Testing + Scaling + Exclusive Bonuses</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="text-align:right"><div class="vprice">₨1,999</div><div style="font-size:.7rem;color:var(--gray);text-decoration:line-through">₨2,498</div></div>
+              <div class="vchev">▼</div>
+            </div>
+          </div>
+          <div class="vbody">Everything in Testing + Scaling, PLUS product research templates, creative script frameworks, Pakistan supplier list, and access to Moosa's private WhatsApp support group.
+          <br><br><a href="https://wa.me/923284138310?text=Hi%20Moosa!%20I%20want%20the%20Complete%20Bundle%20for%20Rs1999" target="_blank" class="btn g-btn" style="font-size:.82rem;padding:10px 18px;margin-top:4px" onclick="fbq('track','InitiateCheckout',{value:1999,currency:'PKR',content_name:'complete_bundle'})">Buy Complete Bundle — ₨1,999</a>
+          </div>
+        </div>
+        <p style="font-size:.78rem;color:var(--gray);text-align:center;margin-top:12px">Payment via EasyPaisa / JazzCash / Bank. Guide delivered via WhatsApp.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CASE STUDIES -->
+<div class="full-sec" id="results" style="background:var(--card);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="inner">
+    <div class="stag rv">Case Studies</div>
+    <h2 class="rv">What Happens When<br><span class="g">We Touch Your Store</span></h2>
+    <div class="cgrid">
+      <div class="ccard rv d1">
+        <div class="cimg">🛍️</div>
+        <div class="cbody">
+          <div class="ctitle">Fashion Brand — Lahore</div>
+          <div class="cmeta">Meta Ads · COD Model · Shopify Store</div>
+          <div class="cres">
+            <div class="cm"><div class="cmn">₨8M+</div><div class="cml">25-Day Revenue</div></div>
+            <div class="cm"><div class="cmn">4.2x</div><div class="cml">ROAS</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="ccard rv d2">
+        <div class="cimg">📦</div>
+        <div class="cbody">
+          <div class="ctitle">Dropshipping Store — Karachi</div>
+          <div class="cmeta">Full Setup · Meta Ads · Product Hunt</div>
+          <div class="cres">
+            <div class="cm"><div class="cmn">₨2.1M</div><div class="cml">First Month</div></div>
+            <div class="cm"><div class="cmn">3.8x</div><div class="cml">ROAS</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="ccard rv d3">
+        <div class="cimg">💊</div>
+        <div class="cbody">
+          <div class="ctitle">Health Products — Islamabad</div>
+          <div class="cmeta">Creative Strategy · Full-Funnel Ads</div>
+          <div class="cres">
+            <div class="cm"><div class="cmn">₨1.6M</div><div class="cml">Monthly Consistent</div></div>
+            <div class="cm"><div class="cmn">5.1x</div><div class="cml">ROAS</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TESTIMONIALS -->
+<section class="sec" id="reviews">
+  <div class="stag rv">Client Reviews</div>
+  <h2 class="rv">What Our Clients<br><span class="g">Actually Say</span></h2>
+  <div class="tgrid">
+    <div class="tcard rv d1">
+      <div class="tstars">★★★★★</div>
+      <div class="tq">"</div>
+      <div class="tt">Moosa ne meri store ki zindagi badal di. Pehle sirf 50K/month tha, ab 800K consistently aa raha hai. His Pakistan COD strategy is unmatched.</div>
+      <div class="tau"><div class="tav">AK</div><div><div class="tanm">Ahmed Khan</div><div class="tarl">Fashion Store, Lahore</div></div></div>
+    </div>
+    <div class="tcard rv d2">
+      <div class="tstars">★★★★★</div>
+      <div class="tq">"</div>
+      <div class="tt">The free guide alone saved me from wasting ₨50,000 on the wrong ad structure. Got the complete bundle and everything clicked. 100% recommend Moosa.</div>
+      <div class="tau"><div class="tav">SR</div><div><div class="tanm">Sara Raza</div><div class="tarl">Shopify Dropshipper, Karachi</div></div></div>
+    </div>
+    <div class="tcard rv d3">
+      <div class="tstars">★★★★★</div>
+      <div class="tq">"</div>
+      <div class="tt">3 months with Scale With Moosa and I went from losing money to 3.5x ROAS consistently. Best investment I've made for my eCom business, hands down.</div>
+      <div class="tau"><div class="tav">UH</div><div><div class="tanm">Usman Hussain</div><div class="tarl">Brand Owner, Islamabad</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- BIG CTA -->
+<div id="cta">
+  <div class="inner rv">
+    <div class="stag" style="justify-content:center;margin-bottom:20px">Ready To Scale?</div>
+    <h2>Want Moosa To<br><span class="g">Scale Your Brand?</span></h2>
+    <p>Book a free 30-minute strategy call. Moosa will personally audit your store and tell you exactly what's holding you back from profitability — no strings attached.</p>
+    <div class="cbtns">
+      <a href="https://wa.me/923284138310?text=Hi%20Moosa!%20I%20want%20a%20free%20strategy%20call%20for%20my%20eCommerce%20brand" target="_blank" class="btn w-btn" onclick="fbq('track','Contact',{content_name:'main_cta'})">💬 Chat on WhatsApp — Free</a>
+      <button onclick="omodal()" class="btn o-btn">📥 Get Free Guide First</button>
+    </div>
+    <p style="font-size:.8rem;color:var(--gray);margin-top:22px">No commitment. Just real, actionable advice. — Moosa Khan</p>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="fi2">
+    <div>
+      <a href="#" class="flogo">Scale<em>WithMoosa</em></a>
+      <p class="fdesc">Pakistan's premium eCommerce growth agency. We build profitable eCom brands using Meta Ads, product strategy, and complete scaling systems built for the COD market.</p>
+      <div class="fsoc">
+        <a href="https://wa.me/923284138310" target="_blank" class="sb">💬</a>
+        <a href="https://instagram.com" target="_blank" class="sb">📸</a>
+        <a href="#" class="sb">📘</a>
+        <a href="#" class="sb">▶️</a>
+      </div>
+    </div>
+    <div class="fcol">
+      <h4>Services</h4>
+      <ul class="flinks">
+        <li><a href="#services">Product Hunting</a></li>
+        <li><a href="#services">Meta Ads Management</a></li>
+        <li><a href="#services">Creative Strategy</a></li>
+        <li><a href="#services">Scaling & Optimization</a></li>
+      </ul>
+    </div>
+    <div class="fcol">
+      <h4>Quick Links</h4>
+      <ul class="flinks">
+        <li><a href="#products">Free Guide</a></li>
+        <li><a href="#products">Complete Bundle</a></li>
+        <li><a href="#results">Case Studies</a></li>
+        <li><a href="https://wa.me/923284138310" target="_blank">Book Consultation</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="fbot">
+    <p>Pakistani Market Experience <a href="#">3Years+</a></p>
+    <p>© 2023 Scale With Moosa · Built by <a href="#">Moosa Khan</a></p>
+    <p>📍Tariq Plaza, A1 Block, Valencia, Lahore, Pakistan · <a href="https://wa.me/923284138310">+92 328 4138310</a></p>
+  </div>
+</footer>
+
+<script>
+// Header scroll
+const hdr=document.getElementById('hdr');
+window.addEventListener('scroll',()=>hdr.classList.toggle('s',scrollY>50));
+
+// Ticker
+const items=[
+  {a:'₨8M+ Revenue',b:'in just 25 days'},
+  {a:'4.2x ROAS',b:'Fashion brand, Lahore'},
+  {a:'340% Avg ROAS',b:'across all clients'},
+  {a:'COD Specialist',b:'Pakistan market only'},
+  {a:'100+ Brands',b:'scaled profitably'},
+  {a:'₨2.1M First Month',b:'Karachi dropshipper'},
+  {a:'5.1x ROAS',b:'Health brand, Islamabad'},
+  {a:'Meta Ads Pro',b:'certified & experienced'},
+];
+const tk=document.getElementById('tk');
+const html=items.map(i=>`<div class="ti"><strong>${i.a}</strong><span style="color:var(--gray)">${i.b}</span><span class="d">·</span></div>`).join('');
+tk.innerHTML=html+html;
+
+// Counter animation
+function counter(el,target,suf,dur=1800){
+  const s=performance.now();
+  (function tick(t){
+    const p=Math.min((t-s)/dur,1);
+    const e=1-Math.pow(1-p,3);
+    el.textContent=Math.round(target*e)+suf;
+    if(p<1)requestAnimationFrame(tick);
+  })(s);
+}
+
+// Scroll reveal
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(!e.isIntersecting)return;
+    e.target.classList.add('in');
+    e.target.querySelectorAll('[data-target]').forEach(el=>{
+      counter(el,+el.dataset.target,el.dataset.suf||'');
+      el.removeAttribute('data-target');
+    });
+  });
+},{threshold:0.08});
+document.querySelectorAll('.rv').forEach(el=>obs.observe(el));
+
+// Hero counters (visible on load)
+setTimeout(()=>{
+  document.querySelectorAll('.hstat-n[data-target]').forEach(el=>{
+    counter(el,+el.dataset.target,el.dataset.suf||'');
+    el.removeAttribute('data-target');
+  });
+},400);
+
+// Variant accordion
+function togv(id){
+  const it=document.getElementById(id);
+  const isOpen=it.classList.contains('open');
+  document.querySelectorAll('.vitem').forEach(v=>v.classList.remove('open'));
+  if(!isOpen)it.classList.add('open');
+}
+
+// Modal
+function omodal(){
+  document.getElementById('modal').classList.add('on');
+  document.body.style.overflow='hidden';
+  fbq('track','Lead',{content_name:'modal_open'});
+}
+function cmodal(){
+  document.getElementById('modal').classList.remove('on');
+  document.body.style.overflow='';
+}
+document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)cmodal()});
+
+function subm(){
+  const n=document.getElementById('mn').value.trim();
+  const w=document.getElementById('mw').value.trim();
+  if(!n||!w){alert('Please enter your name and WhatsApp number.');return;}
+  fbq('track','Lead',{content_name:'free_guide_modal',value:0,currency:'PKR'});
+  document.getElementById('mf').style.display='none';
+  document.getElementById('ms').style.display='block';
+  setTimeout(()=>window.open(`pdf/EcomAdsGuide-Moosa.pdf`,'_blank'),1200);
+}
+
+function subinline(){
+  const n=document.getElementById('in').value.trim();
+  const w=document.getElementById('iw').value.trim();
+  if(!n||!w){alert('Please enter your name and WhatsApp number.');return;}
+  fbq('track','Lead',{content_name:'free_guide_inline',value:0,currency:'PKR'});
+  window.open(`pdf/EcomAdsGuide-Moosa.pdf`,'_blank');
+}
+
+// Mouse parallax on orbs
+document.addEventListener('mousemove',e=>{
+  const o2=document.querySelector('.o2');
+  if(!o2)return;
+  const x=(e.clientX/innerWidth-.5)*25;
+  const y=(e.clientY/innerHeight-.5)*18;
+  o2.style.transform=`translate(${x}px,${y}px)`;
+});
+</script>
+</body>
+</html>
