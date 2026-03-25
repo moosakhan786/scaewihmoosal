@@ -726,7 +726,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:64px 48p
   document.getElementById('mf').style.display='none';
   document.getElementById('ms').style.display='block';
   downloadPDF();
-  setTimeout(()=>window.open(`pdf/EcomAdsGuide-Moosa.pdf`,'_blank'),1200);
+  
 }
   function subinline(){
   const n=document.getElementById('in').value.trim();
@@ -734,7 +734,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:64px 48p
   if(!n||!w){alert('Please enter your name and WhatsApp number.');return;}
   fbq('track','Lead',{content_name:'free_guide_inline',value:0,currency:'PKR'});
   downloadPDF();
-  window.open(`pdf/EcomAdsGuide-Moosa.pdf`,'_blank');
+ 
 }
   function togv(id) { document.getElementById(id).classList.toggle('open'); }
 
