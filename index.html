@@ -718,12 +718,22 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:64px 48p
     document.getElementById('mf').style.display='block'; 
     document.getElementById('ms').style.display='none'; 
   }
-  function subm() { 
-    // Add real form submission logic here if needed
-    document.getElementById('mf').style.display='none'; 
-    document.getElementById('ms').style.display='block'; 
-  }
-  function subinline() { omodal(); subm(); }
+  function subm(){
+  const n=document.getElementById('mn').value.trim();
+  const w=document.getElementById('mw').value.trim();
+  if(!n||!w){alert('Please enter your name and WhatsApp number.');return;}
+  fbq('track','Lead',{content_name:'free_guide_modal',value:0,currency:'PKR'});
+  document.getElementById('mf').style.display='none';
+  document.getElementById('ms').style.display='block';
+  setTimeout(()=>window.open(`pdf/EcomAdsGuide-Moosa.pdf`,'_blank'),1200);
+}
+  function subinline(){
+  const n=document.getElementById('in').value.trim();
+  const w=document.getElementById('iw').value.trim();
+  if(!n||!w){alert('Please enter your name and WhatsApp number.');return;}
+  fbq('track','Lead',{content_name:'free_guide_inline',value:0,currency:'PKR'});
+  window.open(`pdf/EcomAdsGuide-Moosa.pdf`,'_blank');
+}
   function togv(id) { document.getElementById(id).classList.toggle('open'); }
 
   /* Ticker Generation */
