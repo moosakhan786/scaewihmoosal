@@ -725,6 +725,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:64px 48p
   fbq('track','Lead',{content_name:'free_guide_modal',value:0,currency:'PKR'});
   document.getElementById('mf').style.display='none';
   document.getElementById('ms').style.display='block';
+  downloadPDF();
   setTimeout(()=>window.open(`pdf/EcomAdsGuide-Moosa.pdf`,'_blank'),1200);
 }
   function subinline(){
@@ -732,6 +733,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:64px 48p
   const w=document.getElementById('iw').value.trim();
   if(!n||!w){alert('Please enter your name and WhatsApp number.');return;}
   fbq('track','Lead',{content_name:'free_guide_inline',value:0,currency:'PKR'});
+  downloadPDF();
   window.open(`pdf/EcomAdsGuide-Moosa.pdf`,'_blank');
 }
   function togv(id) { document.getElementById(id).classList.toggle('open'); }
@@ -747,6 +749,15 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:64px 48p
   window.addEventListener('scroll', () => {
     document.getElementById('hdr').classList.toggle('s', window.scrollY > 50);
   });
+
+  function downloadPDF() {
+  const link = document.createElement('a');
+  link.href = 'pdf/EcomAdsGuide-Moosa.pdf';
+  link.download = 'Moosa-FreeGuide.pdf';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
 
   /* Intersection Observer for Animations */
   const obs = new IntersectionObserver((entries) => {
