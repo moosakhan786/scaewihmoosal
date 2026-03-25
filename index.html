@@ -7,7 +7,7 @@
 <title>Scale With Moosa — eCommerce Growth Agency Pakistan</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script>
 !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
 fbq('init','YOUR_PIXEL_ID');fbq('track','PageView');
@@ -385,6 +385,176 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:64px 48p
   .mdl{padding:30px 22px}
   .sgrid{grid-template-columns:1fr}
 }
+
+/* ===== MOBILE HEADER ===== */
+.menu-toggle{
+  display:none;
+  font-size:1.5rem;
+  color:#fff;
+  cursor:pointer;
+  z-index:1001;
+}
+
+/* Mobile Nav */
+@media(max-width:960px){
+
+  #hdr{
+    padding:14px 16px;
+  }
+
+  .logo{
+    font-size:1rem;
+  }
+
+  .menu-toggle{
+    display:block;
+  }
+
+  nav{
+    position:fixed;
+    top:70px;
+    right:-100%;
+    width:75%;
+    height:100vh;
+    background:rgba(10,10,10,.98);
+    backdrop-filter:blur(20px);
+    flex-direction:column;
+    align-items:flex-start;
+    padding:30px 20px;
+    gap:18px;
+    transition:all .4s ease;
+    border-left:1px solid var(--border);
+  }
+
+  nav.active{
+    right:0;
+  }
+
+  nav a{
+    font-size:1rem;
+    width:100%;
+    padding:10px 0;
+  }
+
+  /* Hide desktop CTA button */
+  #hdr .btn{
+    display:none;
+  }
+}
+
+/* ===== MOBILE TYPOGRAPHY ===== */
+@media(max-width:768px){
+
+  body{
+    font-size:15px;
+  }
+
+  h1{
+    font-size:2.3rem !important;
+    line-height:1.15;
+  }
+
+  h2{
+    font-size:1.7rem !important;
+  }
+
+  .hsub{
+    font-size:.95rem;
+  }
+
+  .slead{
+    font-size:.9rem;
+  }
+
+  .btn{
+    font-size:.85rem;
+  }
+}
+
+/* ===== TOUCH FRIENDLY ===== */
+@media(max-width:768px){
+  .btn{
+    min-height:46px;
+    padding:14px 18px;
+  }
+
+  .fi{
+    padding:14px;
+    font-size:.9rem;
+  }
+
+  .vhead{
+    padding:18px;
+  }
+}
+
+/* ===== HERO FIX ===== */
+@media(max-width:580px){
+
+  #hero{
+    padding:100px 18px 60px;
+  }
+
+  .hbtns{
+    flex-direction:column;
+  }
+
+  .hbtns .btn{
+    width:100%;
+    justify-content:center;
+  }
+}
+
+/* ===== GRID FIXES ===== */
+@media(max-width:960px){
+
+  .pgrid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .sgrid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .cgrid,
+  .tgrid{
+    grid-template-columns:1fr;
+  }
+
+  .playout{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:580px){
+
+  .pgrid,
+  .sgrid{
+    grid-template-columns:1fr;
+  }
+
+  .hstats{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .hgrid2{
+    grid-template-columns:1fr;
+  }
+}
+
+/* ===== SMALL UX IMPROVEMENTS ===== */
+.btn{
+  transition:all .3s ease;
+}
+
+.btn:active{
+  transform:scale(.96);
+}
+
+nav a:active{
+  opacity:.6;
+}
+  
 </style>
 </head>
 <body>
@@ -416,13 +586,14 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:64px 48p
 <!-- HEADER -->
 <header id="hdr">
   <a href="#" class="logo">Scale<em>WithMoosa</em></a>
-  <nav>
-    <a href="#services">Services</a>
-    <a href="#products">Products</a>
-    <a href="#results">Results</a>
-    <a href="#how">Process</a>
-    <a href="#reviews">Reviews</a>
-  </nav>
+  <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+  <nav id="nav">
+  <a href="#services">Services</a>
+  <a href="#products">Products</a>
+  <a href="#results">Results</a>
+  <a href="#how">Process</a>
+  <a href="#reviews">Reviews</a>
+</nav>
   <a href="https://wa.me/923284138310?text=Hi%20Moosa%2C%20I%20want%20to%20book%20a%20free%20strategy%20call" target="_blank" class="btn g-btn" onclick="fbq('track','Contact',{content_name:'header_cta'})">Book Free Call →</a>
 </header>
 
@@ -793,6 +964,10 @@ function subinline(){
   if(!n||!w){alert('Please enter your name and WhatsApp number.');return;}
   fbq('track','Lead',{content_name:'free_guide_inline',value:0,currency:'PKR'});
   window.open(`pdf/EcomAdsGuide-Moosa.pdf`,'_blank');
+}
+
+function toggleMenu(){
+  document.getElementById("nav").classList.toggle("active");
 }
 
 // Mouse parallax on orbs
