@@ -1,0 +1,1904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Murder Mystery | Detective Game</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Share+Tech+Mono&display=swap');
+
+  :root {
+    --blood: #8B0000;
+    --blood-bright: #CC0000;
+    --gold: #C9A84C;
+    --gold-dim: #7a6128;
+    --smoke: #1a1a2e;
+    --shadow: #0d0d1a;
+    --ash: #2a2a3e;
+    --paper: #f5e6c8;
+    --paper-dark: #d4b896;
+    --text-main: #e8dcc8;
+    --text-dim: #8a7a6a;
+    --green-clue: #2ecc71;
+    --red-wrong: #e74c3c;
+    --cyan-accent: #00bcd4;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--shadow);
+    color: var(--text-main);
+    font-family: 'Crimson Pro', serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    perspective: 1000px;
+  }
+
+  /* ── 3D BACKGROUND SCENE ── */
+  #bg-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .scene-wrapper {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  /* Fog layers */
+  .fog {
+    position: absolute;
+    width: 200%;
+    height: 100%;
+    background: radial-gradient(ellipse at center, transparent 0%, rgba(13,13,26,0.6) 70%);
+    animation: fogDrift 25s ease-in-out infinite alternate;
+  }
+  .fog-2 {
+    animation-delay: -12s;
+    animation-duration: 18s;
+    background: radial-gradient(ellipse at 30% 50%, rgba(139,0,0,0.05) 0%, transparent 60%);
+  }
+  @keyframes fogDrift { from { transform: translateX(-10%); } to { transform: translateX(0%); } }
+
+  /* Floating particles */
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    animation: float linear infinite;
+    opacity: 0;
+  }
+  @keyframes float {
+    0% { transform: translateY(100vh) translateX(0) scale(0); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 0.6; }
+    100% { transform: translateY(-100px) translateX(var(--drift)) scale(1.2); opacity: 0; }
+  }
+
+  /* 3D Room Floor perspective */
+  .room-floor {
+    position: absolute;
+    bottom: -20%;
+    left: -50%;
+    width: 200%;
+    height: 60%;
+    background: linear-gradient(to bottom, transparent, rgba(10,5,20,0.9));
+    transform: perspective(600px) rotateX(60deg);
+    transform-origin: bottom center;
+  }
+
+  /* Grid lines for 3D floor effect */
+  .grid-floor {
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%; height: 40%;
+    background-image: 
+      linear-gradient(rgba(201,168,76,0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,168,76,0.08) 1px, transparent 1px);
+    background-size: 60px 60px;
+    transform: perspective(800px) rotateX(70deg);
+    transform-origin: bottom center;
+  }
+
+  /* Candlelight effect */
+  .candle-glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(40px);
+    animation: flicker 3s ease-in-out infinite alternate;
+    pointer-events: none;
+  }
+  @keyframes flicker {
+    0% { opacity: 0.3; transform: scale(1); }
+    25% { opacity: 0.7; transform: scale(1.1); }
+    50% { opacity: 0.4; transform: scale(0.95); }
+    75% { opacity: 0.8; transform: scale(1.05); }
+    100% { opacity: 0.5; transform: scale(1); }
+  }
+
+  /* ── MAIN GAME CONTAINER ── */
+  #app {
+    position: relative;
+    z-index: 10;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .screen {
+    display: none;
+    width: 100%;
+    max-width: 860px;
+    animation: screenIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .screen.active { display: block; }
+
+  @keyframes screenIn {
+    from { opacity: 0; transform: translateY(30px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* ── GAME CARD ── */
+  .game-card {
+    background: linear-gradient(135deg, rgba(26,22,40,0.97) 0%, rgba(15,10,25,0.99) 100%);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 4px;
+    padding: 40px;
+    box-shadow:
+      0 0 0 1px rgba(201,168,76,0.1),
+      0 40px 80px rgba(0,0,0,0.8),
+      0 0 120px rgba(139,0,0,0.15),
+      inset 0 1px 0 rgba(201,168,76,0.2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .game-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), var(--blood), var(--gold), transparent);
+    animation: shimmer 4s ease-in-out infinite;
+  }
+  @keyframes shimmer { 0%,100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+  .game-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse at 20% 0%, rgba(201,168,76,0.04) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, rgba(139,0,0,0.06) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  /* Corner ornaments */
+  .corner-ornament {
+    position: absolute;
+    width: 50px; height: 50px;
+    border-color: var(--gold-dim);
+    border-style: solid;
+    opacity: 0.5;
+  }
+  .corner-ornament.tl { top: 10px; left: 10px; border-width: 1px 0 0 1px; }
+  .corner-ornament.tr { top: 10px; right: 10px; border-width: 1px 1px 0 0; }
+  .corner-ornament.bl { bottom: 10px; left: 10px; border-width: 0 0 1px 1px; }
+  .corner-ornament.br { bottom: 10px; right: 10px; border-width: 0 1px 1px 0; }
+
+  /* ── TYPOGRAPHY ── */
+  .title-main {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1.8rem, 5vw, 3.2rem);
+    font-weight: 900;
+    text-align: center;
+    background: linear-gradient(135deg, var(--gold) 0%, #fff5d6 40%, var(--gold) 60%, #8B6914 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+    letter-spacing: 0.05em;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+
+  .title-sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    text-align: center;
+    color: var(--blood-bright);
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    margin-bottom: 30px;
+  }
+
+  .section-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1rem, 3vw, 1.5rem);
+    color: var(--gold);
+    margin-bottom: 16px;
+    letter-spacing: 0.05em;
+  }
+
+  .case-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1.1rem, 3vw, 1.8rem);
+    color: var(--gold);
+    text-align: center;
+    margin-bottom: 6px;
+  }
+
+  .case-difficulty {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .diff-easy { color: #2ecc71; }
+  .diff-medium { color: #f39c12; }
+  .diff-hard { color: var(--blood-bright); }
+
+  /* ── DIVIDERS ── */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0;
+    opacity: 0.6;
+  }
+  .divider-line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--gold-dim), transparent); }
+  .divider-icon { color: var(--gold-dim); font-size: 0.8rem; }
+
+  /* ── HUD / STATS BAR ── */
+  .hud {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+
+  .hud-item {
+    background: rgba(201,168,76,0.08);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 2px;
+    padding: 6px 14px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--paper-dark);
+  }
+  .hud-label { color: var(--text-dim); }
+  .hud-val { color: var(--gold); font-weight: bold; }
+  .hud-lives { color: var(--blood-bright); }
+
+  /* ── STORY TEXT ── */
+  .story-box {
+    background: rgba(0,0,0,0.3);
+    border-left: 3px solid var(--blood);
+    padding: 18px 22px;
+    margin-bottom: 20px;
+    border-radius: 0 3px 3px 0;
+    font-style: italic;
+    line-height: 1.8;
+    font-size: 1rem;
+    color: var(--paper);
+  }
+
+  .clue-box {
+    background: rgba(46,204,113,0.06);
+    border: 1px solid rgba(46,204,113,0.3);
+    border-radius: 3px;
+    padding: 14px 18px;
+    margin: 10px 0;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--green-clue);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .clue-box::before { content: '▶'; flex-shrink: 0; margin-top: 1px; }
+
+  .warning-box {
+    background: rgba(139,0,0,0.1);
+    border: 1px solid rgba(139,0,0,0.4);
+    border-radius: 3px;
+    padding: 14px 18px;
+    margin: 10px 0;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.82rem;
+    color: #ff6b6b;
+  }
+
+  .note-box {
+    background: rgba(201,168,76,0.06);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 3px;
+    padding: 14px 18px;
+    margin: 10px 0;
+    font-size: 0.9rem;
+    color: var(--paper-dark);
+  }
+
+  /* ── SUSPECTS LIST ── */
+  .suspects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    margin: 16px 0;
+  }
+
+  .suspect-card {
+    background: rgba(201,168,76,0.05);
+    border: 1px solid rgba(201,168,76,0.15);
+    border-radius: 3px;
+    padding: 14px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .suspect-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--blood);
+  }
+  .suspect-card:hover {
+    background: rgba(201,168,76,0.1);
+    border-color: rgba(201,168,76,0.4);
+    transform: translateX(4px);
+  }
+  .suspect-name {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 0.9rem;
+    color: var(--gold);
+    margin-bottom: 4px;
+  }
+  .suspect-role { font-size: 0.8rem; color: var(--text-dim); font-style: italic; }
+
+  /* ── BUTTONS ── */
+  .btn-group {
+    display: grid;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .btn {
+    background: rgba(201,168,76,0.08);
+    border: 1px solid rgba(201,168,76,0.3);
+    color: var(--paper);
+    padding: 14px 24px;
+    font-family: 'Crimson Pro', serif;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 3px;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .btn::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 0;
+    background: linear-gradient(90deg, rgba(201,168,76,0.15), transparent);
+    transition: width 0.3s ease;
+  }
+  .btn:hover::before { width: 100%; }
+  .btn:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+    transform: translateX(6px);
+    box-shadow: -4px 0 20px rgba(201,168,76,0.2), 4px 0 0 rgba(201,168,76,0.4);
+  }
+  .btn:active { transform: translateX(4px) scale(0.99); }
+
+  .btn-icon {
+    font-size: 1.2rem;
+    min-width: 28px;
+    text-align: center;
+  }
+  .btn-number {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--blood-bright);
+    min-width: 20px;
+    border: 1px solid rgba(139,0,0,0.4);
+    padding: 2px 6px;
+    border-radius: 2px;
+    background: rgba(139,0,0,0.1);
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, rgba(139,0,0,0.3), rgba(80,0,0,0.4));
+    border-color: rgba(139,0,0,0.6);
+    color: #ff9090;
+    justify-content: center;
+    text-align: center;
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+  }
+  .btn-primary:hover {
+    background: linear-gradient(135deg, rgba(139,0,0,0.6), rgba(100,0,0,0.7));
+    border-color: var(--blood-bright);
+    color: #fff;
+    transform: translateX(0) scale(1.02);
+    box-shadow: 0 0 30px rgba(139,0,0,0.4);
+  }
+
+  .btn-gold {
+    background: linear-gradient(135deg, rgba(201,168,76,0.2), rgba(120,90,30,0.3));
+    border-color: var(--gold-dim);
+    color: var(--gold);
+    justify-content: center;
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+  }
+  .btn-gold:hover {
+    background: linear-gradient(135deg, rgba(201,168,76,0.4), rgba(160,120,40,0.5));
+    border-color: var(--gold);
+    transform: translateX(0) scale(1.02);
+    box-shadow: 0 0 30px rgba(201,168,76,0.3);
+  }
+
+  /* ── INPUT ── */
+  .input-wrapper {
+    position: relative;
+    margin-bottom: 20px;
+  }
+  .input-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: block;
+  }
+  .game-input {
+    width: 100%;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(201,168,76,0.3);
+    color: var(--paper);
+    padding: 14px 18px;
+    font-family: 'Crimson Pro', serif;
+    font-size: 1.1rem;
+    border-radius: 3px;
+    outline: none;
+    transition: all 0.3s ease;
+  }
+  .game-input:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 20px rgba(201,168,76,0.15);
+  }
+  .game-input::placeholder { color: var(--text-dim); }
+
+  /* ── RESULT SCREENS ── */
+  .result-correct {
+    text-align: center;
+    padding: 30px 0;
+  }
+  .result-icon {
+    font-size: 4rem;
+    margin-bottom: 16px;
+    animation: popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes popIn {
+    from { transform: scale(0) rotate(-10deg); opacity: 0; }
+    to { transform: scale(1) rotate(0); opacity: 1; }
+  }
+  .result-correct .result-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1.2rem, 4vw, 2rem);
+    color: var(--gold);
+    margin-bottom: 12px;
+  }
+  .result-wrong .result-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1.2rem, 4vw, 1.6rem);
+    color: var(--blood-bright);
+    margin-bottom: 12px;
+  }
+  .confession-text {
+    font-style: italic;
+    background: rgba(0,0,0,0.4);
+    border-left: 3px solid var(--gold);
+    padding: 16px 20px;
+    margin: 16px 0;
+    line-height: 1.7;
+    font-size: 0.95rem;
+    color: var(--paper);
+  }
+
+  .score-gained {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1rem;
+    color: var(--green-clue);
+    margin: 10px 0;
+    animation: slideUp 0.5s ease;
+  }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── MENU ITEMS ── */
+  .menu-grid {
+    display: grid;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  /* ── INVESTIGATION MENU ── */
+  .inv-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 10px;
+    margin: 16px 0;
+  }
+
+  /* ── RANK BADGE ── */
+  .rank-badge {
+    display: inline-block;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    padding: 5px 14px;
+    border-radius: 2px;
+    margin: 8px auto;
+  }
+  .rank-rookie { background: rgba(100,100,100,0.2); border: 1px solid #666; color: #aaa; }
+  .rank-junior { background: rgba(52,152,219,0.1); border: 1px solid #3498db; color: #3498db; }
+  .rank-senior { background: rgba(155,89,182,0.1); border: 1px solid #9b59b6; color: #9b59b6; }
+  .rank-master { background: rgba(201,168,76,0.1); border: 1px solid var(--gold); color: var(--gold); }
+  .rank-legend { background: rgba(139,0,0,0.2); border: 1px solid var(--blood-bright); color: var(--blood-bright); }
+
+  /* ── HEART LIVES ── */
+  .lives-display {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .heart { font-size: 1rem; transition: all 0.3s; }
+  .heart.lost { opacity: 0.2; filter: grayscale(1); transform: scale(0.8); }
+
+  /* ── EVIDENCE SUMMARY ── */
+  .evidence-grid {
+    display: grid;
+    gap: 6px;
+    margin: 14px 0;
+  }
+  .evidence-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.88rem;
+    color: var(--paper-dark);
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(201,168,76,0.08);
+  }
+  .evidence-bullet { color: var(--gold); flex-shrink: 0; }
+
+  /* ── NAME ENTRY SPECIAL ── */
+  .name-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 8px;
+    margin: 16px 0;
+  }
+  .name-chip {
+    background: rgba(201,168,76,0.06);
+    border: 1px solid rgba(201,168,76,0.2);
+    color: var(--paper);
+    padding: 10px 14px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: 'Crimson Pro', serif;
+    font-size: 1rem;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .name-chip:hover {
+    background: rgba(201,168,76,0.15);
+    border-color: var(--gold);
+    color: var(--gold);
+    transform: scale(1.05);
+  }
+
+  /* ── HOW TO PLAY ── */
+  .how-to-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(201,168,76,0.08);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+  .how-icon { font-size: 1.3rem; flex-shrink: 0; }
+
+  /* ── STATS SCREEN ── */
+  .stats-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(201,168,76,0.1);
+    font-size: 1rem;
+  }
+  .stats-label { color: var(--text-dim); font-style: italic; }
+  .stats-val { color: var(--gold); font-family: 'Share Tech Mono', monospace; }
+
+  /* ── CASE SELECTION ── */
+  .case-list { display: grid; gap: 12px; margin: 16px 0; }
+  .case-item {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(201,168,76,0.15);
+    border-radius: 3px;
+    padding: 18px 20px;
+    cursor: pointer;
+    transition: all 0.25s;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .case-item:hover {
+    background: rgba(201,168,76,0.06);
+    border-color: rgba(201,168,76,0.4);
+    transform: translateX(6px);
+  }
+  .case-num {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.6rem;
+    color: rgba(201,168,76,0.3);
+    min-width: 36px;
+    font-weight: 900;
+  }
+  .case-info { flex: 1; }
+  .case-name {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1rem;
+    color: var(--gold);
+    margin-bottom: 4px;
+  }
+  .case-desc { font-size: 0.85rem; color: var(--text-dim); font-style: italic; }
+
+  /* ── INTERROGATION SCREEN ── */
+  .suspect-info {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 3px;
+    padding: 18px;
+    margin-bottom: 18px;
+  }
+  .suspect-avatar {
+    font-size: 3rem;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .dialogue-line {
+    padding: 8px 0;
+    font-style: italic;
+    color: var(--paper);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+  .dialogue-name {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--gold);
+    letter-spacing: 0.15em;
+    margin-bottom: 3px;
+  }
+
+  /* ── FINAL ACCUSATION ── */
+  .accusation-suspects {
+    display: grid;
+    gap: 10px;
+    margin: 16px 0;
+  }
+  .accusation-btn {
+    background: rgba(139,0,0,0.08);
+    border: 1px solid rgba(139,0,0,0.3);
+    color: var(--paper);
+    padding: 14px 20px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: 'Crimson Pro', serif;
+    font-size: 1rem;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.25s;
+  }
+  .accusation-btn:hover {
+    background: rgba(139,0,0,0.25);
+    border-color: var(--blood-bright);
+    color: #fff;
+    transform: translateX(6px);
+    box-shadow: -4px 0 0 var(--blood);
+  }
+  .accusation-num {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--blood-bright);
+    border: 1px solid rgba(139,0,0,0.5);
+    padding: 2px 6px;
+    border-radius: 2px;
+    min-width: 22px;
+    text-align: center;
+  }
+
+  /* ── GAMEOVER / WIN ── */
+  .endscreen {
+    text-align: center;
+    padding: 20px 0;
+  }
+  .endscreen-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
+    margin-bottom: 10px;
+  }
+  .gameover-title { color: var(--blood-bright); }
+  .win-title { color: var(--gold); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .game-card { padding: 24px 18px; }
+    .suspects-grid { grid-template-columns: 1fr; }
+    .inv-grid { grid-template-columns: 1fr; }
+    .name-grid { grid-template-columns: repeat(3, 1fr); }
+    .hud { gap: 6px; }
+    .hud-item { padding: 5px 10px; font-size: 0.7rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── 3D SCENE BACKGROUND ── -->
+<div class="scene-wrapper" aria-hidden="true">
+  <canvas id="bg-canvas"></canvas>
+  <div class="fog"></div>
+  <div class="fog fog-2"></div>
+  <div class="grid-floor"></div>
+  <div class="candle-glow" style="width:300px;height:300px;background:radial-gradient(circle,rgba(201,168,76,0.15),transparent);top:10%;left:10%;"></div>
+  <div class="candle-glow" style="width:200px;height:200px;background:radial-gradient(circle,rgba(139,0,0,0.12),transparent);top:20%;right:15%;animation-delay:-1.5s;"></div>
+  <div class="candle-glow" style="width:250px;height:250px;background:radial-gradient(circle,rgba(201,168,76,0.08),transparent);bottom:20%;right:10%;animation-delay:-0.7s;"></div>
+</div>
+
+<!-- ── APP ── -->
+<div id="app">
+
+  <!-- SPLASH SCREEN -->
+  <div class="screen active" id="screen-splash">
+    <div class="game-card">
+      <div class="corner-ornament tl"></div><div class="corner-ornament tr"></div>
+      <div class="corner-ornament bl"></div><div class="corner-ornament br"></div>
+
+      <div style="text-align:center;margin-bottom:30px;">
+        <div style="font-size:3rem;margin-bottom:12px;filter:drop-shadow(0 0 20px rgba(139,0,0,0.8));">🔍</div>
+        <div class="title-main">Murder Mystery</div>
+        <div class="title-sub">◆ Detective Agency ◆ Three Cases ◆</div>
+      </div>
+
+      <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+
+      <div class="story-box">
+        The city sleeps — but evil never rests. Three impossible cases await your brilliance, Detective. From poisoned parlours to deadly galas, only the sharpest mind can unmask the killer before more lives are lost.
+      </div>
+
+      <div class="input-wrapper">
+        <label class="input-label" for="name-input">▸ Your Detective Name</label>
+        <input type="text" id="name-input" class="game-input" placeholder="Enter your name..." maxlength="24" />
+      </div>
+
+      <div class="input-label">◆ Or choose a name</div>
+      <div class="name-grid">
+        <div class="name-chip" onclick="pickName('Ahmed')">Ahmed</div>
+        <div class="name-chip" onclick="pickName('Moosa')">Moosa</div>
+        <div class="name-chip" onclick="pickName('Uzaim')">Uzaim</div>
+        <div class="name-chip" onclick="pickName('Hamza')">Hamza</div>
+        <div class="name-chip" onclick="pickName('Ali')">Ali</div>
+        <div class="name-chip" onclick="pickName('Zain')">Zain</div>
+        <div class="name-chip" onclick="pickName('Essa')">Essa</div>
+        <div class="name-chip" onclick="pickName('Shoaib')">Shoaib</div>
+        <div class="name-chip" onclick="pickName('Zohaib')">Zohaib</div>
+        <div class="name-chip" onclick="pickName('Saad')">Saad</div>
+        <div class="name-chip" onclick="pickName('Bilal')">Bilal</div>
+        <div class="name-chip" onclick="pickName('Tariq')">Tariq</div>
+      </div>
+
+      <div style="display:grid;gap:10px;margin-top:20px;">
+        <button class="btn btn-primary" onclick="startGame()">⚖ Begin Investigation</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN MENU -->
+  <div class="screen" id="screen-menu">
+    <div class="game-card">
+      <div class="corner-ornament tl"></div><div class="corner-ornament tr"></div>
+      <div class="corner-ornament bl"></div><div class="corner-ornament br"></div>
+
+      <div style="text-align:center;margin-bottom:16px;">
+        <div class="title-main">Murder Mystery</div>
+        <div class="title-sub">Detective Command Centre</div>
+      </div>
+      <div id="hud-main" class="hud"></div>
+      <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+
+      <div class="menu-grid">
+        <button class="btn" onclick="showScreen('screen-cases')"><span class="btn-number">01</span><span class="btn-icon">🗂</span>Start New Case</button>
+        <button class="btn" onclick="showScreen('screen-stats')"><span class="btn-number">02</span><span class="btn-icon">📊</span>View Detective Stats</button>
+        <button class="btn" onclick="showScreen('screen-howto')"><span class="btn-number">03</span><span class="btn-icon">📖</span>How To Play</button>
+        <button class="btn btn-primary" onclick="showScreen('screen-splash')" style="font-family:'Crimson Pro',serif;font-size:1rem;letter-spacing:0;"><span class="btn-icon">🚪</span>Quit Investigation</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW TO PLAY -->
+  <div class="screen" id="screen-howto">
+    <div class="game-card">
+      <div class="corner-ornament tl"></div><div class="corner-ornament tr"></div>
+      <div class="corner-ornament bl"></div><div class="corner-ornament br"></div>
+
+      <div class="section-title">📖 Detective's Handbook</div>
+      <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+
+      <div class="how-to-item"><span class="how-icon">🕵️</span><span>You are a detective assigned to solve murder cases across three difficulty levels.</span></div>
+      <div class="how-to-item"><span class="how-icon">🔍</span><span>Each case has suspects, crime scenes, and hidden clues. Explore everything.</span></div>
+      <div class="how-to-item"><span class="how-icon">💬</span><span>Question suspects carefully — their reactions often reveal more than their words.</span></div>
+      <div class="how-to-item"><span class="how-icon">⚖</span><span>When ready, make your final accusation. Choose wisely — wrong accusation costs a life.</span></div>
+      <div class="how-to-item"><span class="how-icon">❤️</span><span>You have 3 lives. Lose them all and your career is over. Points are deducted for mistakes.</span></div>
+      <div class="how-to-item"><span class="how-icon">🏆</span><span>Solve all 3 cases to achieve legendary detective status. Your rank depends on your score.</span></div>
+
+      <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+      <button class="btn btn-gold" onclick="showScreen('screen-menu')">← Return to HQ</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="screen" id="screen-stats">
+    <div class="game-card">
+      <div class="corner-ornament tl"></div><div class="corner-ornament tr"></div>
+      <div class="corner-ornament bl"></div><div class="corner-ornament br"></div>
+
+      <div class="section-title">📊 Detective Dossier</div>
+      <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+      <div id="stats-content"></div>
+      <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+      <button class="btn btn-gold" onclick="showScreen('screen-menu')">← Return to HQ</button>
+    </div>
+  </div>
+
+  <!-- CASE SELECTION -->
+  <div class="screen" id="screen-cases">
+    <div class="game-card">
+      <div class="corner-ornament tl"></div><div class="corner-ornament tr"></div>
+      <div class="corner-ornament bl"></div><div class="corner-ornament br"></div>
+
+      <div class="section-title">🗂 Active Case Files</div>
+      <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+      <div class="case-list">
+        <div class="case-item" onclick="startCase(1)">
+          <div class="case-num">I</div>
+          <div class="case-info">
+            <div class="case-name">The Mansion Murder</div>
+            <div class="case-desc">Lord Asim found poisoned in his study at Asim Manor. Who served the deadly tea?</div>
+          </div>
+          <span class="diff-easy" style="font-family:'Share Tech Mono';font-size:0.72rem;letter-spacing:.2em;flex-shrink:0;">EASY</span>
+        </div>
+        <div class="case-item" onclick="startCase(2)">
+          <div class="case-num">II</div>
+          <div class="case-info">
+            <div class="case-name">The Hotel Mystery</div>
+            <div class="case-desc">Famous singer Layla found strangled in Room 307. The door was locked from inside.</div>
+          </div>
+          <span class="diff-medium" style="font-family:'Share Tech Mono';font-size:0.72rem;letter-spacing:.2em;flex-shrink:0;">MEDIUM</span>
+        </div>
+        <div class="case-item" onclick="startCase(3)">
+          <div class="case-num">III</div>
+          <div class="case-info">
+            <div class="case-name">The Poison Party</div>
+            <div class="case-desc">Billionaire Arjun Khalid poisoned at his own gala. A web of twins, stolen jewels, and false alibis.</div>
+          </div>
+          <span class="diff-hard" style="font-family:'Share Tech Mono';font-size:0.72rem;letter-spacing:.2em;flex-shrink:0;">HARD</span>
+        </div>
+      </div>
+      <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+      <button class="btn btn-gold" onclick="showScreen('screen-menu')">← Return to HQ</button>
+    </div>
+  </div>
+
+  <!-- DYNAMIC SCREEN (case content) -->
+  <div class="screen" id="screen-dynamic">
+    <div class="game-card" id="dynamic-card">
+      <div class="corner-ornament tl"></div><div class="corner-ornament tr"></div>
+      <div class="corner-ornament bl"></div><div class="corner-ornament br"></div>
+      <div id="dynamic-content"></div>
+    </div>
+  </div>
+
+  <!-- GAME OVER -->
+  <div class="screen" id="screen-gameover">
+    <div class="game-card">
+      <div class="corner-ornament tl"></div><div class="corner-ornament tr"></div>
+      <div class="corner-ornament bl"></div><div class="corner-ornament br"></div>
+      <div class="endscreen">
+        <div class="result-icon">💀</div>
+        <div class="endscreen-title gameover-title">Case Closed — On You</div>
+        <div class="story-box" style="margin:20px 0;" id="gameover-text"></div>
+        <button class="btn btn-gold" style="max-width:300px;margin:0 auto;" onclick="resetGame()">Start Over</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WIN SCREEN -->
+  <div class="screen" id="screen-win">
+    <div class="game-card">
+      <div class="corner-ornament tl"></div><div class="corner-ornament tr"></div>
+      <div class="corner-ornament bl"></div><div class="corner-ornament br"></div>
+      <div class="endscreen" id="win-content"></div>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<script>
+// ════════════════════════════════════════════════
+//   GAME STATE
+// ════════════════════════════════════════════════
+const G = {
+  player: '',
+  score: 0,
+  lives: 3,
+  solved: 0,
+};
+
+// ════════════════════════════════════════════════
+//   SCREEN MANAGEMENT
+// ════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) { el.classList.add('active'); window.scrollTo(0,0); }
+  if (id === 'screen-stats') renderStats();
+  if (id === 'screen-menu') renderHUD();
+}
+
+function pickName(n) { document.getElementById('name-input').value = n; }
+
+function startGame() {
+  const name = document.getElementById('name-input').value.trim();
+  if (!name) { document.getElementById('name-input').focus(); return; }
+  G.player = name;
+  showScreen('screen-menu');
+}
+
+function renderHUD() {
+  document.getElementById('hud-main').innerHTML = `
+    <div class="hud-item"><span class="hud-label">Detective</span><span class="hud-val">${G.player}</span></div>
+    <div class="hud-item"><span class="hud-label">Score</span><span class="hud-val">${G.score}</span></div>
+    <div class="hud-item"><span class="hud-label">Lives</span>${heartsHTML()}</div>
+    <div class="hud-item"><span class="hud-label">Cases</span><span class="hud-val">${G.solved}/3</span></div>
+  `;
+}
+
+function heartsHTML() {
+  let h = '';
+  for (let i = 0; i < 3; i++) h += `<span class="heart ${i >= G.lives ? 'lost' : ''}">❤️</span>`;
+  return `<div class="lives-display">${h}</div>`;
+}
+
+function renderStats() {
+  const rank = getRank();
+  document.getElementById('stats-content').innerHTML = `
+    <div class="stats-row"><span class="stats-label">Detective Name</span><span class="stats-val">${G.player}</span></div>
+    <div class="stats-row"><span class="stats-label">Total Score</span><span class="stats-val">${G.score}</span></div>
+    <div class="stats-row"><span class="stats-label">Lives Remaining</span><span class="stats-val">${heartsHTML()}</span></div>
+    <div class="stats-row"><span class="stats-label">Cases Solved</span><span class="stats-val">${G.solved} / 3</span></div>
+    <div class="stats-row"><span class="stats-label">Current Rank</span><span class="rank-badge rank-${rank.cls}">${rank.name}</span></div>
+  `;
+}
+
+function getRank() {
+  if (G.score >= 300) return { name: 'MASTER DETECTIVE', cls: 'master' };
+  if (G.score >= 150) return { name: 'SENIOR DETECTIVE', cls: 'senior' };
+  if (G.score >= 50)  return { name: 'JUNIOR DETECTIVE', cls: 'junior' };
+  return { name: 'ROOKIE', cls: 'rookie' };
+}
+
+function resetGame() {
+  G.score = 0; G.lives = 3; G.solved = 0;
+  showScreen('screen-splash');
+}
+
+// ════════════════════════════════════════════════
+//   DYNAMIC CONTENT HELPER
+// ════════════════════════════════════════════════
+function setDynamic(html) {
+  document.getElementById('dynamic-content').innerHTML = html;
+  showScreen('screen-dynamic');
+}
+
+function miniHUD() {
+  return `<div class="hud" style="margin-bottom:18px;">
+    <div class="hud-item"><span class="hud-label">Det.</span><span class="hud-val">${G.player}</span></div>
+    <div class="hud-item"><span class="hud-label">Score</span><span class="hud-val">${G.score}</span></div>
+    <div class="hud-item"><span class="hud-label">Lives</span>${heartsHTML()}</div>
+  </div>`;
+}
+
+function backBtn(fn) { return `<button class="btn btn-gold" onclick="${fn}" style="margin-top:16px;">← Back to Investigation</button>`; }
+function menuBtn() { return `<button class="btn" style="margin-top:10px;" onclick="showScreen('screen-menu')">← Return to HQ</button>`; }
+
+// ════════════════════════════════════════════════
+//   CASE 1 — THE MANSION MURDER
+// ════════════════════════════════════════════════
+const c1 = { accused: false };
+
+function startCase(n) {
+  if (n === 1) case1Menu();
+  else if (n === 2) case2Menu();
+  else if (n === 3) case3Menu();
+}
+
+function case1Intro() {
+  setDynamic(`
+    ${miniHUD()}
+    <div class="case-title">The Mansion Murder</div>
+    <div class="case-difficulty diff-easy">◆ DIFFICULTY: EASY ◆</div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+    <div class="story-box">
+      Lord Asim Qureshi was found dead in his study at Qureshi Manor. Time of death: 10:00 PM.<br><br>
+      Cause: Poisoning — arsenic detected in his evening tea.
+    </div>
+    <div class="section-title">Primary Suspects</div>
+    <div class="suspects-grid">
+      <div class="suspect-card"><div class="suspect-name">Jameel</div><div class="suspect-role">The Butler — 20 years of service</div></div>
+      <div class="suspect-card"><div class="suspect-name">Saira</div><div class="suspect-role">The Niece — sole potential heir</div></div>
+      <div class="suspect-card"><div class="suspect-name">Vikram</div><div class="suspect-role">Business Partner — 15-year associate</div></div>
+    </div>
+    <div class="note-box">⚠ Your job: Find the killer. Every clue matters.</div>
+    <button class="btn btn-gold" onclick="case1Menu()" style="margin-top:16px;">Begin Investigation →</button>
+  `);
+}
+
+function case1Menu() {
+  c1.accused = false;
+  setDynamic(`
+    ${miniHUD()}
+    <div class="case-title">Case I — Investigation</div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+    <div class="inv-grid">
+      <button class="btn" onclick="case1Scene()"><span class="btn-icon">🔎</span>Examine Crime Scene</button>
+      <button class="btn" onclick="case1James()"><span class="btn-icon">🧑‍💼</span>Question Jameel (Butler)</button>
+      <button class="btn" onclick="case1Saira()"><span class="btn-icon">👩</span>Question Saira (Niece)</button>
+      <button class="btn" onclick="case1Vikram()"><span class="btn-icon">🤵</span>Question Vikram (Partner)</button>
+      <button class="btn btn-primary" onclick="case1Accuse()" style="grid-column:1/-1;"><span class="btn-icon">⚖</span>Make Final Accusation</button>
+    </div>
+    ${menuBtn()}
+  `);
+}
+
+function case1Scene() {
+  G.score += 10;
+  setDynamic(`
+    ${miniHUD()}
+    <div class="section-title">🔎 Crime Scene — Lord's Study</div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+    <div class="story-box">You examine the room with meticulous care. Every detail could break the case.</div>
+    <div class="evidence-grid">
+      <div class="evidence-item"><span class="evidence-bullet">◆</span>A teacup on the desk — half empty, white powder residue visible near the rim.</div>
+      <div class="evidence-item"><span class="evidence-bullet">◆</span>A pair of butler gloves are missing from their rack near the door.</div>
+      <div class="evidence-item"><span class="evidence-bullet">◆</span>A will document on the desk — unsigned and undated.</div>
+      <div class="evidence-item"><span class="evidence-bullet">◆</span>The window is locked from the inside. No external entry possible.</div>
+    </div>
+    <div class="clue-box">CLUE FOUND: Arsenic traces detected in the teacup!</div>
+    <div class="clue-box">CLUE FOUND: Missing butler gloves — butler's size.</div>
+    <div class="score-gained">+10 points for examining the crime scene!</div>
+    ${backBtn('case1Menu()')}
+  `);
+}
+
+function case1James() {
+  setDynamic(`
+    ${miniHUD()}
+    <div class="section-title">💬 Interrogating Jameel — The Butler</div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+    <div class="suspect-info">
+      <div class="suspect-avatar">🧑‍💼</div>
+      <div class="dialogue-name">JAMEEL SAYS:</div>
+      <div class="dialogue-line">"Good evening, Detective. A terrible night indeed."</div>
+      <div class="dialogue-line">"I served Lord Asim his evening tea at 9:30 PM, as I always do."</div>
+      <div class="dialogue-line">"After that, I retired to my quarters. I saw nothing more."</div>
+    </div>
+    <div class="section-title">Ask Jameel about:</div>
+    <div class="btn-group">
+      <button class="btn" onclick="case1JamesQ(1)"><span class="btn-number">01</span>The missing gloves</button>
+      <button class="btn" onclick="case1JamesQ(2)"><span class="btn-number">02</span>His relationship with Lord Asim</button>
+      <button class="btn" onclick="case1JamesQ(3)"><span class="btn-number">03</span>Anyone else in the study</button>
+      ${backBtn('case1Menu()')}
+    </div>
+  `);
+}
+
+function case1JamesQ(q) {
+  let html = '';
+  if (q === 1) {
+    G.score += 15;
+    html = `<div class="clue-box">Jameel hesitates, his eyes shifting nervously to the left. "I... I misplaced them somewhere." His discomfort is unmistakable.</div>
+            <div class="clue-box">CLUE: Jameel is lying about the gloves!</div>
+            <div class="score-gained">+15 points — you caught the lie!</div>`;
+  } else if (q === 2) {
+    G.score += 15;
+    html = `<div class="clue-box">Jameel's composure cracks. "Lord Asim was cutting my salary. I had served him for 20 years! Twenty years of loyalty and this is how he repays me?"</div>
+            <div class="clue-box">CLUE: Jameel had MOTIVE — financial anger!</div>
+            <div class="score-gained">+15 points — motive found!</div>`;
+  } else {
+    G.score += 10;
+    html = `<div class="clue-box">Jameel meets your gaze steadily. "No one else was there. Just me and him. I was the last person to see him alive."</div>
+            <div class="clue-box">CLUE: He was the last person to see the victim!</div>
+            <div class="score-gained">+10 points!</div>`;
+  }
+  setDynamic(`${miniHUD()}<div class="section-title">💬 Jameel's Response</div><div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>${html}${backBtn('case1James()')}`);
+}
+
+function case1Saira() {
+  setDynamic(`
+    ${miniHUD()}
+    <div class="section-title">💬 Interrogating Saira — The Niece</div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+    <div class="suspect-info">
+      <div class="suspect-avatar">👩</div>
+      <div class="dialogue-name">SAIRA SAYS:</div>
+      <div class="dialogue-line">"Oh Detective, how awful all of this is! Uncle Asim was so dear to me."</div>
+      <div class="dialogue-line">"We had dinner together at 8 PM. I went to bed at 9 PM. I was nowhere near the study."</div>
+    </div>
+    <div class="section-title">Ask Saira about:</div>
+    <div class="btn-group">
+      <button class="btn" onclick="case1SairaQ(1)"><span class="btn-number">01</span>The unsigned will on the desk</button>
+      <button class="btn" onclick="case1SairaQ(2)"><span class="btn-number">02</span>Her uncle's enemies</button>
+      ${backBtn('case1Menu()')}
+    </div>
+  `);
+}
+
+function case1SairaQ(q) {
+  let html = '';
+  if (q === 1) {
+    html = `<div class="note-box">Saira's surprise appears genuine. "What will? I had absolutely no idea there was any document." Her reaction rings true.</div>
+            <div class="note-box">NOTE: Saira seems innocent regarding the will.</div>`;
+  } else {
+    G.score += 10;
+    html = `<div class="clue-box">Saira lowers her voice. "Jameel always resented Uncle Asim. He told me once he would 'make him pay' for cutting his salary."</div>
+            <div class="clue-box">CLUE: Saira confirms Jameel's motive!</div>
+            <div class="score-gained">+10 points!</div>`;
+  }
+  setDynamic(`${miniHUD()}<div class="section-title">💬 Saira's Response</div><div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>${html}${backBtn('case1Saira()')}`);
+}
+
+function case1Vikram() {
+  G.score += 5;
+  setDynamic(`
+    ${miniHUD()}
+    <div class="section-title">💬 Interrogating Vikram — Business Partner</div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+    <div class="suspect-info">
+      <div class="suspect-avatar">🤵</div>
+      <div class="dialogue-name">VIKRAM SAYS:</div>
+      <div class="dialogue-line">"Asim and I were partners for 15 years. He was more than a colleague."</div>
+      <div class="dialogue-line">"I was at the Pearl Continental Club last night. Twenty witnesses. Iron alibi."</div>
+      <div class="dialogue-line">"Business was excellent. No reason whatsoever to harm him."</div>
+    </div>
+    <div class="note-box">✓ Vikram's alibi checks out with the city club records.</div>
+    <div class="note-box">NOTE: Vikram appears innocent — solid alibi confirmed.</div>
+    <div class="score-gained">+5 points for investigating.</div>
+    ${backBtn('case1Menu()')}
+  `);
+}
+
+function case1Accuse() {
+  setDynamic(`
+    ${miniHUD()}
+    <div class="section-title">⚖ Final Accusation — Case I</div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+    <div class="note-box">Evidence Summary:<br><br>
+      ◆ Arsenic in teacup — tea served by Jameel<br>
+      ◆ Jameel's gloves missing<br>
+      ◆ Jameel had motive (salary cut)<br>
+      ◆ Jameel was last to see the victim<br>
+      ◆ Vikram has verified alibi<br>
+      ◆ Saira was in bed by 9 PM
+    </div>
+    <div class="section-title" style="margin-top:16px;">Who is the killer?</div>
+    <div class="accusation-suspects">
+      <button class="accusation-btn" onclick="case1Result(1)"><span class="accusation-num">01</span>Jameel — The Butler</button>
+      <button class="accusation-btn" onclick="case1Result(2)"><span class="accusation-num">02</span>Saira — The Niece</button>
+      <button class="accusation-btn" onclick="case1Result(3)"><span class="accusation-num">03</span>Vikram — The Business Partner</button>
+    </div>
+    ${backBtn('case1Menu()')}
+  `);
+}
+
+function case1Result(ch) {
+  if (ch === 1) {
+    G.score += 50; G.solved++;
+    setDynamic(`
+      ${miniHUD()}
+      <div class="result-correct">
+        <div class="result-icon">🏆</div>
+        <div class="result-title">CORRECT!</div>
+        <div class="confession-text">
+          Jameel's composure finally shatters.<br><br>
+          "Yes! He was going to dismiss me after twenty years of faithful service! I put arsenic in his nightly tea. I wore gloves so there would be no fingerprints. I thought I was clever... I thought I had gotten away with it."<br><br>
+          Jameel is arrested. <strong>CASE SOLVED!</strong>
+        </div>
+        <div class="score-gained">+50 points for solving the case!</div>
+        <button class="btn btn-gold" onclick="showScreen('screen-cases')" style="margin-top:16px;">Next Case →</button>
+        ${menuBtn()}
+      </div>
+    `);
+    checkWin();
+  } else {
+    G.lives--; G.score -= 20;
+    const over = G.lives <= 0;
+    setDynamic(`
+      ${miniHUD()}
+      <div class="result-wrong" style="text-align:center;padding:20px 0;">
+        <div class="result-icon">❌</div>
+        <div class="result-title">WRONG ACCUSATION!</div>
+        <div class="warning-box" style="text-align:left;margin:16px 0;">That suspect has a verified alibi. The real killer watches you flounder and smiles.</div>
+        <div class="warning-box">-20 points. Lives remaining: ${G.lives}</div>
+        ${over ? `<button class="btn btn-primary" onclick="showGameOver()" style="margin-top:16px;">Continue...</button>` : `<button class="btn btn-gold" onclick="case1Menu()" style="margin-top:16px;">← Try Again</button>`}
+      </div>
+    `);
+    if (over) setTimeout(showGameOver, 100);
+  }
+}
+
+// ════════════════════════════════════════════════
+//   CASE 2 — THE HOTEL MYSTERY
+// ════════════════════════════════════════════════
+function case2Menu() {
+  setDynamic(`
+    ${miniHUD()}
+    <div class="case-title">Case II — Investigation</div>
+    <div class="case-difficulty diff-medium">◆ THE HOTEL MYSTERY ◆</div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+    <div class="story-box">
+      Famous singer Layla Noor found strangled in Room 307 of the Grand Pearl Hotel. The door was locked from inside. Time of death: 11:30 PM.<br><br>
+      Suspects: <strong>Farhan</strong> (Manager), <strong>Daniyal</strong> (Bodyguard), <strong>Sofia</strong> (Personal Manager), <strong>Mr. Raza</strong> (Room 308 Guest)
+    </div>
+    <div class="inv-grid">
+      <button class="btn" onclick="case2Scene()"><span class="btn-icon">🔎</span>Examine Crime Scene</button>
+      <button class="btn" onclick="case2Farhan()"><span class="btn-icon">🧑‍💼</span>Question Farhan (Manager)</button>
+      <button class="btn" onclick="case2Daniyal()"><span class="btn-icon">💪</span>Question Daniyal (Bodyguard)</button>
+      <button class="btn" onclick="case2Sofia()"><span class="btn-icon">👩‍💼</span>Question Sofia (Her Manager)</button>
+      <button class="btn" onclick="case2Raza()"><span class="btn-icon">🚶</span>Question Mr. Raza (Room 308)</button>
+      <button class="btn btn-primary" onclick="case2Accuse()" style="grid-column:1/-1;"><span class="btn-icon">⚖</span>Make Final Accusation</button>
+    </div>
+    ${menuBtn()}
+  `);
+}
+
+function case2Scene() {
+  G.score += 10;
+  setDynamic(`
+    ${miniHUD()}
+    <div class="section-title">🔎 Crime Scene — Room 307</div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+    <div class="evidence-grid">
+      <div class="evidence-item"><span class="evidence-bullet">◆</span>Door was locked from inside — but the key is MISSING from the room.</div>
+      <div class="evidence-item"><span class="evidence-bullet">◆</span>Signs of struggle near the window. A lamp knocked over.</div>
+      <div class="evidence-item"><span class="evidence-bullet">◆</span>A hotel master key card on the floor — BLUE coloured (management only).</div>
+      <div class="evidence-item"><span class="evidence-bullet">◆</span>Layla's phone shows last call at 11:00 PM — number deleted from log.</div>
+      <div class="evidence-item"><span class="evidence-bullet">◆</span>Half-drunk champagne glass — only one glass used.</div>
+      <div class="evidence-item"><span class="evidence-bullet">◆</span>A torn piece of paper reads: "...or I tell everyone"</div>
+    </div>
+    <div class="clue-box">CLUE: Blue master key found — only management has these!</div>
+    <div class="clue-box">CLUE: Layla was blackmailing someone!</div>
+    <div class="score-gained">+10 points!</div>
+    ${backBtn('case2Menu()')}
+  `);
+}
+
+function case2Farhan() {
+  setDynamic(`
+    ${miniHUD()}
+    <div class="section-title">💬 Interrogating Farhan — Hotel Manager</div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+    <div class="suspect-info">
+      <div class="suspect-avatar">🧑‍💼</div>
+      <div class="dialogue-name">FARHAN SAYS:</div>
+      <div class="dialogue-line">"Terrible tragedy. She was our most distinguished guest."</div>
+      <div class="dialogue-line">"I was in the lobby all evening, greeting guests. Many can vouch for me."</div>
+    </div>
+    <div class="btn-group">
+      <button class="btn" onclick="case2FarhanQ(1)"><span class="btn-number">01</span>The blue master key found in the room</button>
+      <button class="btn" onclick="case2FarhanQ(2)"><span class="btn-number">02</span>His relationship with Layla</button>
+      <button class="btn" onclick="case2FarhanQ(3)"><span class="btn-number">03</span>The deleted phone records</button>
+      ${backBtn('case2Menu()')}
+    </div>
+  `);
+}
+
+function case2FarhanQ(q) {
+  let html = '';
+  if (q === 1) {
+    G.score += 20;
+    html = `<div class="clue-box">Farhan: "That must be from housekeeping." You check immediately: housekeeping uses RED cards. This card is BLUE.</div>
+            <div class="clue-box">CRITICAL CLUE: Only Farhan carries blue management master cards!</div>
+            <div class="score-gained">+20 points!</div>`;
+  } else if (q === 2) {
+    G.score += 15;
+    html = `<div class="clue-box">Farhan begins sweating. "Just professional. Nothing beyond that." A staff member discreetly tells you Layla was seen arguing furiously with Farhan two days prior.</div>
+            <div class="clue-box">CLUE: Farhan is hiding their real relationship!</div>
+            <div class="score-gained">+15 points!</div>`;
+  } else {
+    G.score += 20;
+    html = `<div class="clue-box">Farhan's face drains of colour. "I know nothing about her phone." Tech forensics confirm: the deleted call was placed to Farhan's personal number at 11:00 PM sharp.</div>
+            <div class="clue-box">CRITICAL CLUE: Layla called Farhan minutes before her death!</div>
+            <div class="score-gained">+20 points!</div>`;
+  }
+  setDynamic(`${miniHUD()}<div class="section-title">💬 Farhan's Response</div><div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>${html}${backBtn('case2Farhan()')}`);
+}
+
+function case2Daniyal() {
+  setDynamic(`
+    ${miniHUD()}
+    <div class="section-title">💬 Interrogating Daniyal — Bodyguard</div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+    <div class="suspect-info">
+      <div class="suspect-avatar">💪</div>
+      <div class="dialogue-name">DANIYAL SAYS:</div>
+      <div class="dialogue-line">"I was guarding her door the entire night. My job was to protect her."</div>
+      <div class="dialogue-line">"No one entered after 10 PM. I would stake my life on it."</div>
+    </div>
+    <div class="btn-group">
+      <button class="btn" onclick="case2DaniyalQ(1)"><span class="btn-number">01</span>Did he leave his post at any point?</button>
+      <button class="btn" onclick="case2DaniyalQ(2)"><span class="btn-number">02</span>Did he hear anything unusual?</button>
+      ${backBtn('case2Menu()')}
+    </div>
+  `);
+}
+
+function case2DaniyalQ(q) {
+  let html = '';
+  if (q === 1) {
+    G.score += 10;
+    html = `<div class="clue-box">Daniyal: "Just once. 11:15 PM — five minutes to get coffee from the machine down the hall. The corridor was empty when I left and returned."</div>
+            <div class="clue-box">NOTE: 5-minute gap — this is the killer's entry window!</div>
+            <div class="score-gained">+10 points!</div>`;
+  } else {
+    html = `<div class="note-box">Daniyal: "I heard her laughing on a call around 10 PM. After 11 it went very quiet. Too quiet. I assumed she had gone to sleep."</div>
+            <div class="note-box">NOTE: No suspicious sounds heard by Daniyal.</div>`;
+  }
+  setDynamic(`${miniHUD()}<div class="section-title">💬 Daniyal's Response</div><div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>${html}${backBtn('case2Daniyal()')}`);
+}
+
+function case2Sofia() {
+  G.score += 10;
+  setDynamic(`
+    ${miniHUD()}
+    <div class="section-title">💬 Interrogating Sofia — Personal Manager</div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+    <div class="suspect-info">
+      <div class="suspect-avatar">👩‍💼</div>
+      <div class="dialogue-name">SOFIA SAYS:</div>
+      <div class="dialogue-line">"I was at the hotel restaurant for the entire dinner service. The waiter, chef, and twelve other guests can confirm."</div>
+      <div class="dialogue-line">"Layla and I had our disagreements, but I would never… never do something like this."</div>
+    </div>
+    <div class="note-box">✓ Sofia's alibi confirmed by multiple independent witnesses at the restaurant.</div>
+    <div class="note-box">However: Sofia reveals that Layla had been blackmailing someone for months. "She wouldn't say who. But she seemed afraid lately."</div>
+    <div class="clue-box">CLUE: Layla's blackmail victim had strong motive for murder!</div>
+    <div class="score-gained">+10 points!</div>
+    ${backBtn('case2Menu()')}
+  `);
+}
+
+function case2Raza() {
+  setDynamic(`
+    ${miniHUD()}
+    <div class="section-title">💬 Interrogating Mr. Raza — Room 308</div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+    <div class="suspect-info">
+      <div class="suspect-avatar">🚶</div>
+      <div class="dialogue-name">MR. RAZA SAYS:</div>
+      <div class="dialogue-line">"I was in my room all night watching television. I heard nothing suspicious."</div>
+    </div>
+    <div class="btn-group">
+      <button class="btn" onclick="case2RazaQ()"><span class="btn-number">01</span>Ask if he saw anyone in the hallway</button>
+      ${backBtn('case2Menu()')}
+    </div>
+  `);
+}
+
+function case2RazaQ() {
+  G.score += 15;
+  setDynamic(`
+    ${miniHUD()}
+    <div class="section-title">💬 Mr. Raza's Response</div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+    <div class="clue-box">Mr. Raza: "Now that you mention it — around 11:15 PM I opened my door briefly. I saw a man in a dark suit walking quickly away from Room 307. He was carrying something. A key card perhaps."</div>
+    <div class="clue-box">CLUE: Man in dark suit — matches Farhan's appearance that evening!</div>
+    <div class="score-gained">+15 points — eyewitness account secured!</div>
+    ${backBtn('case2Menu()')}
+  `);
+}
+
+function case2Accuse() {
+  setDynamic(`
+    ${miniHUD()}
+    <div class="section-title">⚖ Final Accusation — Case II</div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+    <div class="note-box">Evidence Summary:<br><br>
+      ◆ Blue master key (management only) found in room<br>
+      ◆ Layla was blackmailing her killer<br>
+      ◆ Last call was to Farhan's personal phone<br>
+      ◆ Daniyal left post at 11:15 PM for 5 minutes<br>
+      ◆ Mr. Raza saw a suited man leaving Room 307<br>
+      ◆ Sofia has confirmed restaurant alibi
+    </div>
+    <div class="section-title" style="margin-top:16px;">Who is the killer?</div>
+    <div class="accusation-suspects">
+      <button class="accusation-btn" onclick="case2Result(1)"><span class="accusation-num">01</span>Farhan — Hotel Manager</button>
+      <button class="accusation-btn" onclick="case2Result(2)"><span class="accusation-num">02</span>Daniyal — Bodyguard</button>
+      <button class="accusation-btn" onclick="case2Result(3)"><span class="accusation-num">03</span>Sofia — Personal Manager</button>
+      <button class="accusation-btn" onclick="case2Result(4)"><span class="accusation-num">04</span>Mr. Raza — Room 308 Guest</button>
+    </div>
+    ${backBtn('case2Menu()')}
+  `);
+}
+
+function case2Result(ch) {
+  if (ch === 1) {
+    G.score += 75; G.solved++;
+    setDynamic(`
+      ${miniHUD()}
+      <div class="result-correct">
+        <div class="result-icon">🏆</div>
+        <div class="result-title">OUTSTANDING!</div>
+        <div class="confession-text">
+          Faced with the phone records and Mr. Raza's testimony, Farhan finally breaks.<br><br>
+          "She was blackmailing me with information about a financial fraud from three years ago. She called me that night and threatened to go public. I went to her room to reason with her. Things escalated. I used my management key — I didn't plan it, I swear."<br><br>
+          Farhan is arrested. <strong>CASE SOLVED!</strong>
+        </div>
+        <div class="score-gained">+75 points!</div>
+        <button class="btn btn-gold" onclick="showScreen('screen-cases')" style="margin-top:16px;">Next Case →</button>
+        ${menuBtn()}
+      </div>
+    `);
+    checkWin();
+  } else {
+    G.lives--; G.score -= 30;
+    const over = G.lives <= 0;
+    setDynamic(`
+      ${miniHUD()}
+      <div class="result-wrong" style="text-align:center;padding:20px 0;">
+        <div class="result-icon">❌</div>
+        <div class="result-title">WRONG ACCUSATION!</div>
+        <div class="warning-box" style="text-align:left;margin:16px 0;">Insufficient evidence against that suspect. The real killer watches you flounder.</div>
+        <div class="warning-box">-30 points. Lives remaining: ${G.lives}</div>
+        ${over ? '' : `<button class="btn btn-gold" onclick="case2Menu()" style="margin-top:16px;">← Try Again</button>`}
+      </div>
+    `);
+    if (over) setTimeout(showGameOver, 1500);
+  }
+}
+
+// ════════════════════════════════════════════════
+//   CASE 3 — THE POISON PARTY
+// ════════════════════════════════════════════════
+function case3Menu() {
+  setDynamic(`
+    ${miniHUD()}
+    <div class="case-title">Case III — Investigation</div>
+    <div class="case-difficulty diff-hard">◆ THE POISON PARTY ◆</div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+    <div class="story-box">
+      Billionaire Arjun Khalid collapsed at his own gala dinner. Cyanide detected in his wine glass. 100 guests present — but the killer stood close.<br><br>
+      Suspects: <strong>Isabelle</strong> (Twin Sister 1), <strong>Diana</strong> (Twin Sister 2), <strong>Ghazanfar</strong> (Lawyer), <strong>Rania</strong> (Fiancée), <strong>Chef Zubair</strong>
+    </div>
+    <div class="warning-box">⚠ WARNING: Things are not what they seem. Look very carefully at every detail.</div>
+    <div class="inv-grid">
+      <button class="btn" onclick="case3Scene()"><span class="btn-icon">🔎</span>Examine Crime Scene</button>
+      <button class="btn" onclick="case3Isabelle()"><span class="btn-icon">👩</span>Question Isabelle (Twin 1)</button>
+      <button class="btn" onclick="case3Diana()"><span class="btn-icon">👩</span>Question Diana (Twin 2)</button>
+      <button class="btn" onclick="case3Ghazanfar()"><span class="btn-icon">⚖</span>Question Ghazanfar (Lawyer)</button>
+      <button class="btn" onclick="case3Rania()"><span class="btn-icon">💍</span>Question Rania (Fiancée)</button>
+      <button class="btn" onclick="case3Zubair()"><span class="btn-icon">👨‍🍳</span>Question Chef Zubair</button>
+      <button class="btn btn-primary" onclick="case3Accuse()" style="grid-column:1/-1;"><span class="btn-icon">⚖</span>Make Final Accusation</button>
+    </div>
+    ${menuBtn()}
+  `);
+}
+
+function case3Scene() {
+  G.score += 10;
+  setDynamic(`
+    ${miniHUD()}
+    <div class="section-title">🔎 Crime Scene — The Gala Hall</div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+    <div class="evidence-grid">
+      <div class="evidence-item"><span class="evidence-bullet">◆</span>Wine glass contains cyanide plus a trace of rare perfume.</div>
+      <div class="evidence-item"><span class="evidence-bullet">◆</span>Lab identifies the scent: <em>Noir by Chanel</em> — extremely rare.</div>
+      <div class="evidence-item"><span class="evidence-bullet">◆</span>Arjun's chair was only accessible from the right side of the table.</div>
+      <div class="evidence-item"><span class="evidence-bullet">◆</span>A ring impression on the glass rim — left-handed grip, small hand.</div>
+      <div class="evidence-item"><span class="evidence-bullet">◆</span>Security camera: a hooded figure approached Arjun at 8:47 PM.</div>
+      <div class="evidence-item"><span class="evidence-bullet">◆</span>The figure wore a distinctive emerald brooch.</div>
+    </div>
+    <div class="clue-box">CLUE: Killer wears Noir by Chanel perfume — extremely rare!</div>
+    <div class="clue-box">CLUE: Killer is LEFT-HANDED!</div>
+    <div class="clue-box">CLUE: Killer wore an emerald brooch — check suspects!</div>
+    <div class="score-gained">+10 points!</div>
+    ${backBtn('case3Menu()')}
+  `);
+}
+
+function case3Isabelle() {
+  setDynamic(`
+    ${miniHUD()}
+    <div class="section-title">💬 Interrogating Isabelle — Twin Sister</div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+    <div class="suspect-info">
+      <div class="suspect-avatar">👩</div>
+      <div class="dialogue-name">ISABELLE SAYS:</div>
+      <div class="dialogue-line">"My brother dead! I am devastated beyond words."</div>
+      <div class="dialogue-line">"I was with Ghazanfar the entire evening in the lounge. Ask him."</div>
+    </div>
+    <div class="btn-group">
+      <button class="btn" onclick="case3IsabelleQ(1)"><span class="btn-number">01</span>Ask about her perfume</button>
+      <button class="btn" onclick="case3IsabelleQ(2)"><span class="btn-number">02</span>Which hand does she write with?</button>
+      <button class="btn" onclick="case3IsabelleQ(3)"><span class="btn-number">03</span>Ask about the emerald brooch</button>
+      <button class="btn" onclick="case3IsabelleQ(4)"><span class="btn-number">04</span>The inheritance</button>
+      ${backBtn('case3Menu()')}
+    </div>
+  `);
+}
+
+function case3IsabelleQ(q) {
+  let html = '';
+  if (q === 1) {
+    html = `<div class="note-box">Isabelle: "I wear Rose by Dior. Always have — my mother's favourite." You catch the scent. Unmistakably roses. Not Noir.</div>
+            <div class="note-box">NOTE: Isabelle does NOT wear Noir perfume. Does not match killer.</div>`;
+  } else if (q === 2) {
+    html = `<div class="note-box">Isabelle signs a document to demonstrate. She uses her RIGHT hand, naturally and without hesitation.</div>
+            <div class="note-box">NOTE: Isabelle is right-handed. Killer was left-handed. Does not match.</div>`;
+  } else if (q === 3) {
+    G.score += 20;
+    html = `<div class="clue-box">Isabelle: "My emerald brooch? I lost it last week! I reported it to the event staff here." Staff records confirm: Isabelle reported the brooch missing 3 days ago.</div>
+            <div class="clue-box">CRITICAL CLUE: Someone STOLE Isabelle's brooch — to frame her!</div>
+            <div class="score-gained">+20 points! This changes everything!</div>`;
+  } else {
+    G.score += 10;
+    html = `<div class="note-box">Isabelle: "I inherit 40% of the estate. Diana receives 40%. Ghazanfar receives 20% per the original will."</div>
+            <div class="note-box">NOTE: Both twins had financial motive from inheritance.</div>`;
+    html += `<div class="score-gained">+10 points!</div>`;
+  }
+  setDynamic(`${miniHUD()}<div class="section-title">💬 Isabelle's Response</div><div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>${html}${backBtn('case3Isabelle()')}`);
+}
+
+function case3Diana() {
+  setDynamic(`
+    ${miniHUD()}
+    <div class="section-title">💬 Interrogating Diana — Twin Sister</div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+    <div class="suspect-info">
+      <div class="suspect-avatar">👩</div>
+      <div class="dialogue-name">DIANA SAYS:</div>
+      <div class="dialogue-line">Diana looks almost identical to Isabelle. Your eyes confirm this.</div>
+      <div class="dialogue-line">"I was at the buffet table the entire evening. Dozens of guests saw me there."</div>
+    </div>
+    <div class="btn-group">
+      <button class="btn" onclick="case3DianaQ(1)"><span class="btn-number">01</span>Ask about her perfume</button>
+      <button class="btn" onclick="case3DianaQ(2)"><span class="btn-number">02</span>Which hand does she use?</button>
+      <button class="btn" onclick="case3DianaQ(3)"><span class="btn-number">03</span>Ask about the brooch</button>
+      <button class="btn" onclick="case3DianaQ(4)"><span class="btn-number">04</span>Verify her alibi carefully</button>
+      ${backBtn('case3Menu()')}
+    </div>
+  `);
+}
+
+function case3DianaQ(q) {
+  let html = '';
+  if (q === 1) {
+    G.score += 25;
+    html = `<div class="clue-box">Diana smiles. "I wear Noir by Chanel. My signature scent for years." You catch it immediately — unmistakably Noir.</div>
+            <div class="clue-box">★ MAJOR CLUE: Diana wears Noir — MATCHES the killer's perfume!</div>
+            <div class="score-gained">+25 points!</div>`;
+  } else if (q === 2) {
+    G.score += 25;
+    html = `<div class="clue-box">Diana: "I am ambidextrous, actually." You ask her to write something. Without thinking, she reaches for the pen with her LEFT hand first.</div>
+            <div class="clue-box">★ MAJOR CLUE: Diana is left-handed — MATCHES the killer!</div>
+            <div class="score-gained">+25 points!</div>`;
+  } else if (q === 3) {
+    G.score += 30;
+    html = `<div class="clue-box">Diana: "Brooch? I never wear brooches." But you notice something — a tiny pin mark on her dress fabric. As if something had been pinned there tonight and then removed.</div>
+            <div class="clue-box">★ CRITICAL CLUE: Diana wore a brooch tonight and removed it — Isabelle's stolen brooch!</div>
+            <div class="score-gained">+30 points — outstanding observation!</div>`;
+  } else {
+    G.score += 25;
+    html = `<div class="clue-box">You check individually with buffet guests. Guest 1: "Diana was there, yes — but she disappeared for about ten minutes around 8:45." Guest 2: "She seemed different tonight. More nervous than usual."</div>
+            <div class="clue-box">★ CRITICAL CLUE: Diana was ABSENT during the exact time of the poisoning — alibi BROKEN!</div>
+            <div class="score-gained">+25 points!</div>`;
+  }
+  setDynamic(`${miniHUD()}<div class="section-title">💬 Diana's Response</div><div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>${html}${backBtn('case3Diana()')}`);
+}
+
+function case3Ghazanfar() {
+  setDynamic(`
+    ${miniHUD()}
+    <div class="section-title">💬 Interrogating Ghazanfar — The Lawyer</div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+    <div class="suspect-info">
+      <div class="suspect-avatar">⚖</div>
+      <div class="dialogue-name">GHAZANFAR SAYS:</div>
+      <div class="dialogue-line">"I was with Isabelle the entire evening. We discussed estate matters in the lounge."</div>
+    </div>
+    <div class="btn-group">
+      <button class="btn" onclick="case3GhazanfarQ(1)"><span class="btn-number">01</span>Verify Isabelle's alibi</button>
+      <button class="btn" onclick="case3GhazanfarQ(2)"><span class="btn-number">02</span>Ask about a new will</button>
+      ${backBtn('case3Menu()')}
+    </div>
+  `);
+}
+
+function case3GhazanfarQ(q) {
+  let html = '';
+  if (q === 1) {
+    html = `<div class="note-box">Ghazanfar: "Yes, she was with me from 8 PM to 10 PM." Lounge CCTV confirms Ghazanfar was there with a woman — but the camera angle doesn't clearly show which twin.</div>
+            <div class="note-box">NOTE: Which twin was really with him? This question remains open.</div>`;
+  } else {
+    G.score += 30;
+    html = `<div class="clue-box">Ghazanfar looks deeply uncomfortable. "Arjun told me last week he was revising his will — cutting Diana out completely. Diana did not yet know... or did she?"</div>
+            <div class="clue-box">★ MOTIVE CONFIRMED: Diana was about to lose her entire inheritance!</div>
+            <div class="score-gained">+30 points — perfect motive!</div>`;
+  }
+  setDynamic(`${miniHUD()}<div class="section-title">💬 Ghazanfar's Response</div><div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>${html}${backBtn('case3Ghazanfar()')}`);
+}
+
+function case3Rania() {
+  setDynamic(`
+    ${miniHUD()}
+    <div class="section-title">💬 Interrogating Rania — The Fiancée</div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+    <div class="suspect-info">
+      <div class="suspect-avatar">💍</div>
+      <div class="dialogue-name">RANIA SAYS (weeping):</div>
+      <div class="dialogue-line">"Arjun was everything to me. I cannot believe this."</div>
+      <div class="dialogue-line">"I was dancing with friends all night. Many, many witnesses."</div>
+    </div>
+    <div class="btn-group">
+      <button class="btn" onclick="case3RaniaQ()"><span class="btn-number">01</span>Ask about Diana's behaviour tonight</button>
+      ${backBtn('case3Menu()')}
+    </div>
+  `);
+}
+
+function case3RaniaQ() {
+  G.score += 15;
+  setDynamic(`
+    ${miniHUD()}
+    <div class="section-title">💬 Rania's Response</div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+    <div class="clue-box">Rania: "Diana seemed odd tonight. She kept glancing at Arjun with a strange look. And she disappeared for a while around 8:45." She pauses. "Also — she smelled different. More like Isabelle usually does."</div>
+    <div class="clue-box">CLUE: Even Rania noticed Diana acting strangely and smelling of Isabelle's perfume!</div>
+    <div class="score-gained">+15 points!</div>
+    ${backBtn('case3Rania()')}
+  `);
+}
+
+function case3Zubair() {
+  setDynamic(`
+    ${miniHUD()}
+    <div class="section-title">💬 Interrogating Chef Zubair</div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+    <div class="suspect-info">
+      <div class="suspect-avatar">👨‍🍳</div>
+      <div class="dialogue-name">CHEF ZUBAIR SAYS:</div>
+      <div class="dialogue-line">"I was in the kitchen the entire night. My entire staff can confirm this. I never once left."</div>
+    </div>
+    <div class="note-box">✓ Kitchen CCTV confirms Chef Zubair never left the kitchen all evening.</div>
+    <div class="note-box">NOTE: Chef Zubair is fully CLEARED. No access, no motive.</div>
+    ${backBtn('case3Menu()')}
+  `);
+}
+
+function case3Accuse() {
+  setDynamic(`
+    ${miniHUD()}
+    <div class="section-title">⚖ Final Accusation — Case III</div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+    <div class="note-box">Full Evidence Summary:<br><br>
+      ◆ Killer wore Noir perfume → Diana wears Noir<br>
+      ◆ Killer is left-handed → Diana is left-handed<br>
+      ◆ Killer wore emerald brooch → Diana had pin mark on dress<br>
+      ◆ Brooch was Isabelle's (stolen!) → Diana impersonated Isabelle!<br>
+      ◆ Diana's alibi has 10-min gap at exact murder time<br>
+      ◆ Diana was being cut from the will — MOTIVE!<br>
+      ◆ Isabelle: wrong perfume, wrong hand — CLEARED<br>
+      ◆ Rania, Zubair, Ghazanfar all cleared<br><br>
+      <strong>THE TWIST:</strong> Diana posed as Isabelle wearing her stolen brooch, so witnesses would alibi the wrong twin!
+    </div>
+    <div class="section-title" style="margin-top:16px;">Who is the killer?</div>
+    <div class="accusation-suspects">
+      <button class="accusation-btn" onclick="case3Result(1)"><span class="accusation-num">01</span>Isabelle — Twin Sister 1</button>
+      <button class="accusation-btn" onclick="case3Result(2)"><span class="accusation-num">02</span>Diana — Twin Sister 2</button>
+      <button class="accusation-btn" onclick="case3Result(3)"><span class="accusation-num">03</span>Ghazanfar — The Lawyer</button>
+      <button class="accusation-btn" onclick="case3Result(4)"><span class="accusation-num">04</span>Rania — The Fiancée</button>
+      <button class="accusation-btn" onclick="case3Result(5)"><span class="accusation-num">05</span>Chef Zubair</button>
+    </div>
+    ${backBtn('case3Menu()')}
+  `);
+}
+
+function case3Result(ch) {
+  if (ch === 2) {
+    G.score += 100; G.solved++;
+    setDynamic(`
+      ${miniHUD()}
+      <div class="result-correct">
+        <div class="result-icon">🏆</div>
+        <div class="result-title">LEGENDARY DETECTIVE!</div>
+        <div class="confession-text">
+          Diana shatters completely under the weight of evidence.<br><br>
+          "Arjun was going to cut me out of EVERYTHING! I stole Isabelle's brooch and wore her style so the witnesses would think it was Isabelle near Arjun — not me. I slipped the cyanide into his glass at 8:47 PM. I nearly got away with it. I nearly..."<br><br>
+          Diana is arrested. <strong>CASE SOLVED!</strong>
+        </div>
+        <div class="score-gained">+100 points for cracking the most complex case!</div>
+        <button class="btn btn-gold" onclick="showScreen('screen-menu')" style="margin-top:16px;">Return to HQ →</button>
+      </div>
+    `);
+    checkWin();
+  } else {
+    G.lives--; G.score -= 40;
+    const over = G.lives <= 0;
+    setDynamic(`
+      ${miniHUD()}
+      <div class="result-wrong" style="text-align:center;padding:20px 0;">
+        <div class="result-icon">❌</div>
+        <div class="result-title">WRONG!</div>
+        <div class="warning-box" style="text-align:left;margin:16px 0;">You missed the twin switcheroo. The real killer walks free.</div>
+        <div class="warning-box">-40 points. Lives remaining: ${G.lives}</div>
+        ${over ? '' : `<button class="btn btn-gold" onclick="case3Menu()" style="margin-top:16px;">← Try Again</button>`}
+      </div>
+    `);
+    if (over) setTimeout(showGameOver, 1500);
+  }
+}
+
+// ════════════════════════════════════════════════
+//   END STATES
+// ════════════════════════════════════════════════
+function showGameOver() {
+  document.getElementById('gameover-text').innerHTML =
+    `You have run out of lives, Detective ${G.player}.<br>Final Score: <strong>${G.score}</strong> | Cases Solved: <strong>${G.solved}</strong>`;
+  showScreen('screen-gameover');
+}
+
+function checkWin() {
+  if (G.solved >= 3) {
+    setTimeout(() => {
+      const rank = G.score >= 400 ? { n: 'LEGENDARY DETECTIVE', c: 'rank-legend' } :
+                   G.score >= 250 ? { n: 'MASTER DETECTIVE', c: 'rank-master' } :
+                                    { n: 'SENIOR DETECTIVE', c: 'rank-senior' };
+      document.getElementById('win-content').innerHTML = `
+        <div class="result-icon">🌟</div>
+        <div class="endscreen-title win-title">All Cases Solved!</div>
+        <div class="story-box" style="margin:20px 0;">
+          Detective ${G.player}, you have proven yourself among the greatest investigators in history. Three impossible cases, three killers behind bars.
+        </div>
+        <div style="margin:16px 0;">
+          <div class="stats-row"><span class="stats-label">Final Score</span><span class="stats-val">${G.score}</span></div>
+          <div class="stats-row"><span class="stats-label">Lives Remaining</span><span class="stats-val">${G.lives}</span></div>
+          <div class="stats-row"><span class="stats-label">Final Rank</span><span class="rank-badge ${rank.c}">${rank.n}</span></div>
+        </div>
+        <div class="score-gained" style="font-size:1.1rem;margin:16px 0;">Congratulations — you are a legend.</div>
+        <button class="btn btn-primary" onclick="resetGame()" style="max-width:300px;margin:20px auto 0;">Play Again</button>
+      `;
+      showScreen('screen-win');
+    }, 2500);
+  }
+}
+
+// ════════════════════════════════════════════════
+//   3D PARTICLE CANVAS
+// ════════════════════════════════════════════════
+(function() {
+  const canvas = document.getElementById('bg-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [], animId;
+
+  function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function mkParticle() {
+    return {
+      x: Math.random() * W,
+      y: H + 10,
+      r: Math.random() * 2 + 0.5,
+      speed: Math.random() * 0.8 + 0.3,
+      drift: (Math.random() - 0.5) * 0.5,
+      opacity: 0,
+      maxOp: Math.random() * 0.4 + 0.1,
+      color: Math.random() > 0.7 ? `rgba(139,0,0,` : Math.random() > 0.5 ? `rgba(201,168,76,` : `rgba(200,180,150,`
+    };
+  }
+
+  function init() {
+    particles = [];
+    for (let i = 0; i < 40; i++) {
+      const p = mkParticle();
+      p.y = Math.random() * H;
+      p.opacity = Math.random() * p.maxOp;
+      particles.push(p);
+    }
+  }
+
+  function drawBg() {
+    // Deep dark gradient
+    const grd = ctx.createRadialGradient(W*0.3, H*0.2, 0, W*0.5, H*0.5, Math.max(W,H)*0.8);
+    grd.addColorStop(0, '#1a0a2e');
+    grd.addColorStop(0.4, '#0d0518');
+    grd.addColorStop(1, '#050210');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, W, H);
+
+    // Subtle vignette
+    const vig = ctx.createRadialGradient(W/2, H/2, H*0.2, W/2, H/2, H*0.8);
+    vig.addColorStop(0, 'transparent');
+    vig.addColorStop(1, 'rgba(0,0,0,0.6)');
+    ctx.fillStyle = vig;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  function loop() {
+    ctx.clearRect(0, 0, W, H);
+    drawBg();
+
+    particles.forEach((p, i) => {
+      p.y -= p.speed;
+      p.x += p.drift;
+      if (p.y < H * 0.3) p.opacity = Math.max(0, p.opacity - 0.003);
+      else if (p.opacity < p.maxOp) p.opacity += 0.005;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color + p.opacity + ')';
+      ctx.fill();
+
+      if (p.y < -10) particles[i] = mkParticle();
+    });
+
+    animId = requestAnimationFrame(loop);
+  }
+
+  resize();
+  init();
+  loop();
+  window.addEventListener('resize', () => { resize(); init(); });
+})();
+</script>
+</body>
+</html>
