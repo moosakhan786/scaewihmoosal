@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ExamStress Coach 3D</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap');
+ 
+:root {
+  --green: #00ff88;
+  --yellow: #ffcc00;
+  --orange: #ff8800;
+  --red: #ff2244;
+  --blue: #00ccff;
+  --purple: #aa44ff;
+  --dark: #050810;
+  --card: rgba(10,20,40,0.85);
+  --glow: 0 0 30px rgba(0,200,255,0.3);
+}
+ 
+* { margin:0; padding:0; box-sizing:border-box; }
+ 
+body {
+  background: var(--dark);
+  font-family: 'Rajdhani', sans-serif;
+  color: #fff;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+ 
+/* ---- ANIMATED BG ---- */
+#bg-canvas {
+  position: fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  z-index:0;
+  pointer-events:none;
+}
+ 
+/* ---- PARTICLE FIELD ---- */
+#particle-canvas {
+  position: fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  z-index:1;
+  pointer-events:none;
+}
+ 
+/* ---- MAIN WRAPPER ---- */
+#app {
+  position: relative;
+  z-index:10;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding: 20px;
+}
+ 
+/* ---- HEADER ---- */
+.header {
+  text-align:center;
+  padding: 40px 20px 20px;
+  width:100%;
+}
+ 
+.header h1 {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(24px,5vw,52px);
+  font-weight:900;
+  letter-spacing:4px;
+  background: linear-gradient(135deg, #00ccff, #aa44ff, #00ff88);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  text-transform:uppercase;
+  filter: drop-shadow(0 0 20px rgba(0,200,255,0.5));
+  animation: titlePulse 3s ease-in-out infinite;
+}
+ 
+@keyframes titlePulse {
+  0%,100% { filter: drop-shadow(0 0 20px rgba(0,200,255,0.5)); }
+  50% { filter: drop-shadow(0 0 40px rgba(170,68,255,0.8)); }
+}
+ 
+.header p {
+  font-size:18px;
+  color: rgba(255,255,255,0.5);
+  letter-spacing:6px;
+  text-transform:uppercase;
+  margin-top:8px;
+}
+ 
+/* ---- SCREENS ---- */
+.screen { display:none; width:100%; max-width:900px; }
+.screen.active { display:flex; flex-direction:column; align-items:center; }
+ 
+/* ---- NAME ENTRY ---- */
+#name-screen {
+  justify-content:center;
+  align-items:center;
+  min-height:60vh;
+}
+ 
+.glass-card {
+  background: var(--card);
+  border: 1px solid rgba(0,200,255,0.2);
+  border-radius: 24px;
+  padding: 50px 60px;
+  text-align:center;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 0 60px rgba(0,150,255,0.1), inset 0 1px 0 rgba(255,255,255,0.1);
+  position:relative;
+  overflow:hidden;
+  width:100%;
+  max-width:520px;
+  transform-style: preserve-3d;
+  transition: transform 0.1s ease;
+}
+ 
+.glass-card::before {
+  content:'';
+  position:absolute;
+  top:-1px; left:-1px; right:-1px; bottom:-1px;
+  border-radius:24px;
+  background: linear-gradient(135deg, rgba(0,200,255,0.3), transparent, rgba(170,68,255,0.3));
+  pointer-events:none;
+  z-index:-1;
+}
+ 
+.card-icon {
+  font-size:64px;
+  margin-bottom:20px;
+  display:block;
+  animation: float 3s ease-in-out infinite;
+}
+ 
+@keyframes float {
+  0%,100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(5deg); }
+}
+ 
+.glass-card h2 {
+  font-family:'Orbitron', monospace;
+  font-size:22px;
+  color:#00ccff;
+  margin-bottom:10px;
+  letter-spacing:2px;
+}
+ 
+.glass-card p {
+  color:rgba(255,255,255,0.55);
+  font-size:15px;
+  margin-bottom:30px;
+  line-height:1.6;
+}
+ 
+.input-wrap {
+  position:relative;
+  margin-bottom:24px;
+}
+ 
+.input-wrap input {
+  width:100%;
+  background: rgba(0,200,255,0.07);
+  border: 1px solid rgba(0,200,255,0.3);
+  border-radius:12px;
+  padding:16px 20px;
+  font-size:18px;
+  color:#fff;
+  font-family:'Rajdhani',sans-serif;
+  letter-spacing:2px;
+  outline:none;
+  transition: all 0.3s;
+  text-align:center;
+}
+ 
+.input-wrap input:focus {
+  border-color: #00ccff;
+  box-shadow: 0 0 20px rgba(0,200,255,0.3);
+  background: rgba(0,200,255,0.12);
+}
+ 
+.btn-primary {
+  background: linear-gradient(135deg, #00ccff, #aa44ff);
+  border:none;
+  border-radius:12px;
+  padding:16px 40px;
+  font-size:17px;
+  font-family:'Orbitron',monospace;
+  font-weight:700;
+  color:#fff;
+  cursor:pointer;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  transition: all 0.3s;
+  position:relative;
+  overflow:hidden;
+  width:100%;
+}
+ 
+.btn-primary::before {
+  content:'';
+  position:absolute;
+  top:0; left:-100%;
+  width:100%; height:100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+ 
+.btn-primary:hover::before { left:100%; }
+.btn-primary:hover { transform:translateY(-2px); box-shadow:0 10px 30px rgba(0,200,255,0.4); }
+.btn-primary:active { transform:translateY(0); }
+ 
+/* ---- QUESTION SCREEN ---- */
+#question-screen { gap:30px; }
+ 
+.progress-header {
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:16px;
+}
+ 
+.progress-label {
+  font-family:'Orbitron',monospace;
+  font-size:13px;
+  letter-spacing:3px;
+  color:rgba(255,255,255,0.4);
+}
+ 
+.progress-bar-wrap {
+  width:100%;
+  max-width:600px;
+  background: rgba(255,255,255,0.07);
+  border-radius:100px;
+  height:6px;
+  overflow:hidden;
+}
+ 
+.progress-bar-fill {
+  height:100%;
+  border-radius:100px;
+  background: linear-gradient(90deg, #00ccff, #aa44ff);
+  transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: 0 0 12px rgba(0,200,255,0.6);
+}
+ 
+/* ---- 3D QUESTION CARD ---- */
+.question-3d-wrap {
+  perspective: 1000px;
+  width:100%;
+  max-width:700px;
+}
+ 
+.question-card {
+  background: var(--card);
+  border:1px solid rgba(0,200,255,0.15);
+  border-radius:28px;
+  padding:50px 50px 40px;
+  backdrop-filter:blur(20px);
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.4,0,0.2,1);
+  position:relative;
+  overflow:hidden;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+ 
+.question-card.flip-out {
+  transform: rotateY(-90deg) scale(0.8);
+  opacity:0;
+}
+ 
+.question-card.flip-in {
+  transform: rotateY(0deg) scale(1);
+  opacity:1;
+}
+ 
+.q-number {
+  font-family:'Orbitron',monospace;
+  font-size:12px;
+  letter-spacing:4px;
+  color:rgba(0,200,255,0.5);
+  margin-bottom:8px;
+}
+ 
+.q-icon {
+  font-size:52px;
+  margin-bottom:16px;
+  display:block;
+  filter:drop-shadow(0 0 10px rgba(255,255,255,0.3));
+}
+ 
+.q-text {
+  font-size:clamp(18px,3vw,26px);
+  font-weight:600;
+  color:#fff;
+  line-height:1.4;
+  margin-bottom:8px;
+}
+ 
+.q-sub {
+  font-size:14px;
+  color:rgba(255,255,255,0.4);
+  margin-bottom:36px;
+  font-style:italic;
+}
+ 
+/* ---- SLIDER INPUT ---- */
+.slider-section { width:100%; }
+ 
+.slider-value-display {
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+  margin-bottom:20px;
+}
+ 
+.slider-val {
+  font-family:'Orbitron',monospace;
+  font-size:56px;
+  font-weight:900;
+  line-height:1;
+  transition: color 0.3s, text-shadow 0.3s;
+}
+ 
+.slider-unit {
+  font-size:16px;
+  color:rgba(255,255,255,0.4);
+  font-weight:300;
+}
+ 
+.slider-label-row {
+  display:flex;
+  justify-content:space-between;
+  font-size:12px;
+  color:rgba(255,255,255,0.35);
+  letter-spacing:1px;
+  margin-bottom:10px;
+}
+ 
+input[type=range] {
+  width:100%;
+  height:8px;
+  -webkit-appearance:none;
+  background: rgba(255,255,255,0.1);
+  border-radius:100px;
+  outline:none;
+  cursor:pointer;
+  transition: background 0.3s;
+}
+ 
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance:none;
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  background: linear-gradient(135deg, #00ccff, #aa44ff);
+  cursor:pointer;
+  box-shadow:0 0 15px rgba(0,200,255,0.6);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+ 
+input[type=range]::-webkit-slider-thumb:hover {
+  transform:scale(1.3);
+  box-shadow:0 0 25px rgba(0,200,255,0.9);
+}
+ 
+.option-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  width:100%;
+}
+ 
+.opt-btn {
+  background: rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:14px;
+  padding:16px 20px;
+  color:rgba(255,255,255,0.7);
+  font-size:14px;
+  font-family:'Rajdhani',sans-serif;
+  font-weight:600;
+  cursor:pointer;
+  text-align:left;
+  transition:all 0.25s;
+  letter-spacing:0.5px;
+  line-height:1.4;
+}
+ 
+.opt-btn:hover {
+  background:rgba(0,200,255,0.12);
+  border-color:rgba(0,200,255,0.4);
+  color:#fff;
+  transform:translateY(-2px);
+}
+ 
+.opt-btn.selected {
+  background:rgba(0,200,255,0.18);
+  border-color:#00ccff;
+  color:#00ccff;
+  box-shadow:0 0 20px rgba(0,200,255,0.2);
+}
+ 
+.opt-btn .opt-num {
+  display:block;
+  font-family:'Orbitron',monospace;
+  font-size:20px;
+  font-weight:900;
+  margin-bottom:4px;
+}
+ 
+.next-btn {
+  margin-top:30px;
+  width:100%;
+  background: linear-gradient(135deg, #00ccff22, #aa44ff22);
+  border:1px solid rgba(0,200,255,0.3);
+  border-radius:14px;
+  padding:18px;
+  font-size:16px;
+  font-family:'Orbitron',monospace;
+  color:#00ccff;
+  cursor:pointer;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  transition:all 0.3s;
+}
+ 
+.next-btn:hover {
+  background:linear-gradient(135deg,#00ccff,#aa44ff);
+  color:#fff;
+  box-shadow:0 10px 30px rgba(0,200,255,0.3);
+  transform:translateY(-2px);
+}
+ 
+/* ---- RESULT SCREEN ---- */
+#result-screen { gap:24px; padding-bottom:60px; }
+ 
+/* 3D Brain Orb */
+.orb-wrap {
+  position:relative;
+  width:220px;
+  height:220px;
+  margin:0 auto 10px;
+}
+ 
+#orb-canvas {
+  width:220px;
+  height:220px;
+  border-radius:50%;
+}
+ 
+.orb-ring {
+  position:absolute;
+  top:50%; left:50%;
+  border-radius:50%;
+  border:2px solid rgba(0,200,255,0.3);
+  animation: orb-spin 4s linear infinite;
+  transform-origin: center;
+}
+ 
+.orb-ring:nth-child(2) {
+  width:260px; height:260px;
+  margin:-130px 0 0 -130px;
+  animation-duration:6s;
+  border-color:rgba(170,68,255,0.2);
+}
+ 
+.orb-ring:nth-child(3) {
+  width:300px; height:300px;
+  margin:-150px 0 0 -150px;
+  animation-duration:10s;
+  animation-direction:reverse;
+  border-color:rgba(0,255,136,0.15);
+}
+ 
+@keyframes orb-spin {
+  from { transform:rotate(0deg); }
+  to   { transform:rotate(360deg); }
+}
+ 
+/* Score display */
+.score-display {
+  text-align:center;
+  width:100%;
+}
+ 
+.score-number {
+  font-family:'Orbitron',monospace;
+  font-size:clamp(60px,12vw,100px);
+  font-weight:900;
+  line-height:1;
+  transition:color 0.5s;
+}
+ 
+.score-label {
+  font-size:14px;
+  letter-spacing:6px;
+  color:rgba(255,255,255,0.4);
+  text-transform:uppercase;
+  margin-top:4px;
+}
+ 
+.status-badge {
+  display:inline-block;
+  font-family:'Orbitron',monospace;
+  font-size:clamp(16px,3vw,22px);
+  font-weight:700;
+  padding:12px 36px;
+  border-radius:100px;
+  margin:16px auto;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  transition:all 0.5s;
+}
+ 
+/* Gauge */
+.gauge-wrap {
+  width:100%;
+  max-width:600px;
+  margin:0 auto;
+  padding:0 10px;
+}
+ 
+.gauge-track {
+  width:100%;
+  height:14px;
+  background:rgba(255,255,255,0.06);
+  border-radius:100px;
+  overflow:hidden;
+  position:relative;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,0.4);
+}
+ 
+.gauge-fill {
+  height:100%;
+  border-radius:100px;
+  transition:width 1.5s cubic-bezier(0.4,0,0.2,1);
+  position:relative;
+}
+ 
+.gauge-fill::after {
+  content:'';
+  position:absolute;
+  right:0; top:0;
+  width:20px; height:100%;
+  background:rgba(255,255,255,0.4);
+  border-radius:100px;
+  filter:blur(4px);
+}
+ 
+.gauge-ticks {
+  display:flex;
+  justify-content:space-between;
+  margin-top:8px;
+  font-size:11px;
+  color:rgba(255,255,255,0.25);
+  letter-spacing:1px;
+}
+ 
+/* ANALYSIS CARDS */
+.analysis-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:16px;
+  width:100%;
+  max-width:900px;
+}
+ 
+.analysis-card {
+  background:var(--card);
+  border:1px solid rgba(255,255,255,0.07);
+  border-radius:20px;
+  padding:24px;
+  backdrop-filter:blur(10px);
+  transition:transform 0.3s, box-shadow 0.3s;
+  animation:cardIn 0.5s ease both;
+}
+ 
+@keyframes cardIn {
+  from { opacity:0; transform:translateY(30px) scale(0.95); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+ 
+.analysis-card:hover {
+  transform:translateY(-4px);
+  box-shadow:0 20px 50px rgba(0,0,0,0.4);
+}
+ 
+.a-card-icon { font-size:32px; margin-bottom:12px; display:block; }
+.a-card-title {
+  font-family:'Orbitron',monospace;
+  font-size:13px;
+  letter-spacing:2px;
+  color:rgba(255,255,255,0.4);
+  margin-bottom:6px;
+  text-transform:uppercase;
+}
+ 
+.a-card-val {
+  font-size:28px;
+  font-weight:700;
+  color:#fff;
+  margin-bottom:8px;
+}
+ 
+.a-mini-bar {
+  height:4px;
+  border-radius:100px;
+  background:rgba(255,255,255,0.08);
+  overflow:hidden;
+  margin-bottom:12px;
+}
+ 
+.a-mini-fill {
+  height:100%;
+  border-radius:100px;
+  transition:width 1s ease 0.5s;
+}
+ 
+.a-card-tip {
+  font-size:13px;
+  color:rgba(255,255,255,0.5);
+  line-height:1.6;
+}
+ 
+/* ADVICE PANEL */
+.advice-panel {
+  width:100%;
+  max-width:900px;
+  background:var(--card);
+  border:1px solid rgba(255,255,255,0.07);
+  border-radius:24px;
+  padding:36px;
+  backdrop-filter:blur(10px);
+}
+ 
+.advice-panel h3 {
+  font-family:'Orbitron',monospace;
+  font-size:16px;
+  letter-spacing:3px;
+  color:#00ccff;
+  margin-bottom:24px;
+  text-transform:uppercase;
+}
+ 
+.advice-list { list-style:none; display:flex; flex-direction:column; gap:14px; }
+ 
+.advice-list li {
+  display:flex;
+  gap:14px;
+  align-items:flex-start;
+  padding:16px 18px;
+  background:rgba(255,255,255,0.03);
+  border-radius:12px;
+  border-left:3px solid;
+  font-size:15px;
+  color:rgba(255,255,255,0.8);
+  line-height:1.5;
+  animation:slideIn 0.4s ease both;
+}
+ 
+@keyframes slideIn {
+  from { opacity:0; transform:translateX(-20px); }
+  to   { opacity:1; transform:translateX(0); }
+}
+ 
+.advice-list li .ai { font-size:20px; flex-shrink:0; margin-top:1px; }
+ 
+/* PLAN TIMELINE */
+.plan-wrap {
+  width:100%;
+  max-width:900px;
+  background:var(--card);
+  border:1px solid rgba(255,255,255,0.07);
+  border-radius:24px;
+  padding:36px;
+  backdrop-filter:blur(10px);
+}
+ 
+.plan-wrap h3 {
+  font-family:'Orbitron',monospace;
+  font-size:16px;
+  letter-spacing:3px;
+  color:#aa44ff;
+  margin-bottom:24px;
+  text-transform:uppercase;
+}
+ 
+.timeline { position:relative; padding-left:30px; }
+ 
+.timeline::before {
+  content:'';
+  position:absolute;
+  left:10px; top:0; bottom:0;
+  width:2px;
+  background:linear-gradient(to bottom, #00ccff, #aa44ff, rgba(255,255,255,0.05));
+}
+ 
+.t-item {
+  position:relative;
+  margin-bottom:20px;
+  animation:slideIn 0.4s ease both;
+}
+ 
+.t-item::before {
+  content:'';
+  position:absolute;
+  left:-24px;
+  top:6px;
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:#00ccff;
+  box-shadow:0 0 10px rgba(0,200,255,0.6);
+}
+ 
+.t-time {
+  font-family:'Orbitron',monospace;
+  font-size:12px;
+  color:rgba(0,200,255,0.7);
+  letter-spacing:1px;
+  margin-bottom:3px;
+}
+ 
+.t-text {
+  font-size:14px;
+  color:rgba(255,255,255,0.75);
+  line-height:1.5;
+}
+ 
+/* BOTTOM ACTIONS */
+.action-row {
+  display:flex;
+  gap:16px;
+  width:100%;
+  max-width:900px;
+  flex-wrap:wrap;
+}
+ 
+.btn-secondary {
+  flex:1;
+  min-width:200px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:14px;
+  padding:18px;
+  font-size:15px;
+  font-family:'Orbitron',monospace;
+  color:rgba(255,255,255,0.6);
+  cursor:pointer;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  transition:all 0.3s;
+}
+ 
+.btn-secondary:hover {
+  background:rgba(255,255,255,0.08);
+  border-color:rgba(255,255,255,0.3);
+  color:#fff;
+}
+ 
+/* LOADING SCREEN */
+#loading-screen {
+  justify-content:center;
+  align-items:center;
+  min-height:60vh;
+  flex-direction:column;
+  gap:30px;
+}
+ 
+.loading-orb {
+  width:120px; height:120px;
+  border-radius:50%;
+  position:relative;
+  animation:spin 2s linear infinite;
+}
+ 
+@keyframes spin { to { transform:rotate(360deg); } }
+ 
+.loading-text {
+  font-family:'Orbitron',monospace;
+  font-size:14px;
+  letter-spacing:4px;
+  color:rgba(255,255,255,0.5);
+  animation:pulse 1.5s ease-in-out infinite;
+}
+ 
+@keyframes pulse { 0%,100%{opacity:0.5} 50%{opacity:1} }
+ 
+/* SCAN LINES EFFECT */
+.scanlines {
+  position:fixed;
+  top:0;left:0;right:0;bottom:0;
+  z-index:2;
+  pointer-events:none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.03) 2px,
+    rgba(0,0,0,0.03) 4px
+  );
+}
+ 
+/* CORNER DECORATIONS */
+.corner-deco {
+  position:fixed;
+  width:80px; height:80px;
+  pointer-events:none;
+  z-index:3;
+  opacity:0.3;
+}
+ 
+.corner-deco.tl { top:20px;left:20px;border-top:2px solid #00ccff;border-left:2px solid #00ccff; }
+.corner-deco.tr { top:20px;right:20px;border-top:2px solid #aa44ff;border-right:2px solid #aa44ff; }
+.corner-deco.bl { bottom:20px;left:20px;border-bottom:2px solid #00ff88;border-left:2px solid #00ff88; }
+.corner-deco.br { bottom:20px;right:20px;border-bottom:2px solid #ff8800;border-right:2px solid #ff8800; }
+ 
+/* RESPONSIVE */
+@media(max-width:600px) {
+  .glass-card { padding:30px 24px; }
+  .question-card { padding:30px 24px 24px; }
+  .option-grid { grid-template-columns:1fr; }
+  .advice-panel,.plan-wrap { padding:24px 20px; }
+}
+</style>
+</head>
+<body>
+ 
+<canvas id="bg-canvas"></canvas>
+<canvas id="particle-canvas"></canvas>
+<div class="scanlines"></div>
+<div class="corner-deco tl"></div>
+<div class="corner-deco tr"></div>
+<div class="corner-deco bl"></div>
+<div class="corner-deco br"></div>
+ 
+<div id="app">
+  <div class="header">
+    <h1>ExamStress Coach</h1>
+    <p>Student Mental Health Intelligence System</p>
+  </div>
+ 
+  <!-- NAME SCREEN -->
+  <div class="screen active" id="name-screen">
+    <div class="glass-card" id="name-card">
+      <span class="card-icon">🧠</span>
+      <h2>System Initializing</h2>
+      <p>Answer 5 questions. Get your personalised burnout analysis, risk level, and a custom recovery plan in under 60 seconds.</p>
+      <div class="input-wrap">
+        <input type="text" id="student-name" placeholder="Enter your name..." autocomplete="off" />
+      </div>
+      <button class="btn-primary" onclick="startAssessment()">BEGIN ASSESSMENT →</button>
+    </div>
+  </div>
+ 
+  <!-- QUESTION SCREEN -->
+  <div class="screen" id="question-screen">
+    <div class="progress-header">
+      <div class="progress-label" id="prog-label">QUESTION 1 OF 5</div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="prog-bar" style="width:0%"></div>
+      </div>
+    </div>
+ 
+    <div class="question-3d-wrap">
+      <div class="question-card flip-in" id="q-card">
+        <div class="q-number" id="q-num">01 / 05</div>
+        <span class="q-icon" id="q-icon">😴</span>
+        <div class="q-text" id="q-text">Loading question...</div>
+        <div class="q-sub" id="q-sub"></div>
+        <div id="q-input-area"></div>
+        <button class="next-btn" id="next-btn" onclick="nextQuestion()">NEXT →</button>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- LOADING SCREEN -->
+  <div class="screen" id="loading-screen">
+    <canvas id="orb-canvas-load" width="120" height="120" style="border-radius:50%;"></canvas>
+    <div class="loading-text" id="loading-text">SCANNING NEURAL PATTERNS...</div>
+  </div>
+ 
+  <!-- RESULT SCREEN -->
+  <div class="screen" id="result-screen">
+ 
+    <div class="orb-wrap">
+      <canvas id="orb-canvas" width="220" height="220"></canvas>
+      <div class="orb-ring"></div>
+      <div class="orb-ring"></div>
+      <div class="orb-ring"></div>
+    </div>
+ 
+    <div class="score-display">
+      <div class="score-number" id="res-score">0</div>
+      <div class="score-label">BURNOUT INDEX</div>
+      <div class="status-badge" id="res-badge">ANALYZING...</div>
+    </div>
+ 
+    <div class="gauge-wrap">
+      <div class="gauge-track">
+        <div class="gauge-fill" id="gauge-fill" style="width:0%"></div>
+      </div>
+      <div class="gauge-ticks">
+        <span>0 OPTIMAL</span>
+        <span>25 MILD</span>
+        <span>50 MODERATE</span>
+        <span>75 HIGH</span>
+        <span>100 CRITICAL</span>
+      </div>
+    </div>
+ 
+    <div class="analysis-grid" id="analysis-grid"></div>
+    <div class="advice-panel" id="advice-panel"></div>
+    <div class="plan-wrap" id="plan-wrap"></div>
+ 
+    <div class="action-row">
+      <button class="btn-secondary" onclick="restartAssessment()">↺ RECHECK STATUS</button>
+      <button class="btn-secondary" onclick="shareResult()">COPY RESULTS</button>
+    </div>
+ 
+  </div>
+</div>
+ 
+<script>
+// ===================== BACKGROUND CANVAS =====================
+const bgCanvas = document.getElementById('bg-canvas');
+const bgCtx = bgCanvas.getContext('2d');
+ 
+function resizeBg() {
+  bgCanvas.width = window.innerWidth;
+  bgCanvas.height = window.innerHeight;
+}
+resizeBg();
+window.addEventListener('resize', resizeBg);
+ 
+let bgT = 0;
+function drawBg() {
+  bgCtx.clearRect(0,0,bgCanvas.width,bgCanvas.height);
+  bgCtx.fillStyle = '#050810';
+  bgCtx.fillRect(0,0,bgCanvas.width,bgCanvas.height);
+ 
+  // Grid lines
+  bgCtx.strokeStyle = 'rgba(0,150,255,0.04)';
+  bgCtx.lineWidth = 1;
+  const gSize = 60;
+  for(let x=0;x<bgCanvas.width;x+=gSize){
+    bgCtx.beginPath();bgCtx.moveTo(x,0);bgCtx.lineTo(x,bgCanvas.height);bgCtx.stroke();
+  }
+  for(let y=0;y<bgCanvas.height;y+=gSize){
+    bgCtx.beginPath();bgCtx.moveTo(0,y);bgCtx.lineTo(bgCanvas.width,y);bgCtx.stroke();
+  }
+ 
+  // Nebula glows
+  const cx = bgCanvas.width/2, cy = bgCanvas.height/2;
+  const g1 = bgCtx.createRadialGradient(cx+Math.sin(bgT*0.3)*200, cy+Math.cos(bgT*0.2)*150, 0, cx, cy, 600);
+  g1.addColorStop(0,'rgba(0,100,200,0.06)');
+  g1.addColorStop(1,'transparent');
+  bgCtx.fillStyle = g1;
+  bgCtx.fillRect(0,0,bgCanvas.width,bgCanvas.height);
+ 
+  const g2 = bgCtx.createRadialGradient(cx+Math.cos(bgT*0.4)*300, cy+Math.sin(bgT*0.3)*200, 0, cx, cy, 500);
+  g2.addColorStop(0,'rgba(100,0,200,0.05)');
+  g2.addColorStop(1,'transparent');
+  bgCtx.fillStyle = g2;
+  bgCtx.fillRect(0,0,bgCanvas.width,bgCanvas.height);
+ 
+  bgT += 0.005;
+  requestAnimationFrame(drawBg);
+}
+drawBg();
+ 
+// ===================== PARTICLES =====================
+const pCanvas = document.getElementById('particle-canvas');
+const pCtx = pCanvas.getContext('2d');
+function resizeP(){pCanvas.width=window.innerWidth;pCanvas.height=window.innerHeight;}
+resizeP();
+window.addEventListener('resize',resizeP);
+ 
+const particles=[];
+for(let i=0;i<80;i++){
+  particles.push({
+    x:Math.random()*window.innerWidth,
+    y:Math.random()*window.innerHeight,
+    r:Math.random()*1.5+0.3,
+    vx:(Math.random()-0.5)*0.3,
+    vy:(Math.random()-0.5)*0.3,
+    alpha:Math.random()*0.5+0.1,
+    hue:Math.random()<0.5?190:270
+  });
+}
+ 
+function drawParticles(){
+  pCtx.clearRect(0,0,pCanvas.width,pCanvas.height);
+  particles.forEach(p=>{
+    p.x+=p.vx; p.y+=p.vy;
+    if(p.x<0)p.x=pCanvas.width;
+    if(p.x>pCanvas.width)p.x=0;
+    if(p.y<0)p.y=pCanvas.height;
+    if(p.y>pCanvas.height)p.y=0;
+    pCtx.beginPath();
+    pCtx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    pCtx.fillStyle=`hsla(${p.hue},100%,70%,${p.alpha})`;
+    pCtx.fill();
+  });
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
+ 
+// ===================== 3D CARD TILT =====================
+document.addEventListener('mousemove',e=>{
+  const card = document.getElementById('q-card');
+  if(!card) return;
+  const rect = card.getBoundingClientRect();
+  const cx = rect.left+rect.width/2;
+  const cy = rect.top+rect.height/2;
+  const dx = (e.clientX-cx)/rect.width;
+  const dy = (e.clientY-cy)/rect.height;
+  card.style.transform = `rotateY(${dx*10}deg) rotateX(${-dy*8}deg)`;
+});
+ 
+// ===================== QUESTION DATA =====================
+const questions = [
+  {
+    icon:'😴',
+    text:'How many hours did you sleep last night?',
+    sub:'Honest answer only — this affects your score significantly.',
+    type:'slider',
+    min:0, max:12, val:7, unit:'hours',
+    labels:['0h','3h','6h','9h','12h'],
+    key:'sleep'
+  },
+  {
+    icon:'🍽️',
+    text:'How many meals did you skip today?',
+    sub:'Brain fuel = exam performance.',
+    type:'options',
+    options:[
+      {val:0, num:'0', label:'No meals skipped\nEating properly'},
+      {val:1, num:'1', label:'Skipped one meal\nManaging'},
+      {val:2, num:'2', label:'Skipped two meals\nNot good'},
+      {val:3, num:'3', label:'Did not eat today\nDangerous'}
+    ],
+    key:'meals'
+  },
+  {
+    icon:'😰',
+    text:'What is your anxiety level right now?',
+    sub:'Be honest — no judgment here.',
+    type:'options',
+    options:[
+      {val:1, num:'1', label:'Calm\nHandling it well'},
+      {val:2, num:'2', label:'Mild worry\nNormal pressure'},
+      {val:3, num:'3', label:'Moderate stress\nStrugling a bit'},
+      {val:4, num:'4', label:'High anxiety\nFeel overwhelmed'},
+    ],
+    key:'anxiety'
+  },
+  {
+    icon:'🎯',
+    text:'Can you focus and concentrate on studying?',
+    sub:'Right now, in this moment.',
+    type:'options',
+    options:[
+      {val:1, num:'A', label:'Fully focused\nAbsorbing everything'},
+      {val:2, num:'B', label:'Mostly focused\nOccasional drift'},
+      {val:3, num:'C', label:'Frequently distracted\nStruggling to read'},
+      {val:4, num:'D', label:'Cannot focus at all\nMind is blank'}
+    ],
+    key:'focus'
+  },
+  {
+    icon:'💭',
+    text:'How often are negative thoughts hitting you?',
+    sub:'"I will fail", "I am not smart enough" etc.',
+    type:'slider',
+    min:1, max:4, val:2, unit:'/ 4',
+    labels:['Rarely','Sometimes','Often','Always'],
+    key:'negative'
+  }
+];
+ 
+let currentQ = 0;
+let answers = {};
+let studentName = '';
+ 
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+ 
+function startAssessment(){
+  const inp = document.getElementById('student-name');
+  studentName = inp.value.trim() || 'Student';
+  currentQ = 0;
+  answers = {};
+  showScreen('question-screen');
+  loadQuestion(0);
+}
+ 
+function loadQuestion(idx){
+  const q = questions[idx];
+  const card = document.getElementById('q-card');
+ 
+  card.style.transition = 'none';
+  card.style.opacity='0';
+  card.style.transform='rotateY(-30deg) scale(0.9)';
+ 
+  setTimeout(()=>{
+    document.getElementById('q-num').textContent = `0${idx+1} / 0${questions.length}`;
+    document.getElementById('q-icon').textContent = q.icon;
+    document.getElementById('q-text').textContent = q.text;
+    document.getElementById('q-sub').textContent = q.sub;
+    document.getElementById('prog-label').textContent = `QUESTION ${idx+1} OF ${questions.length}`;
+    document.getElementById('prog-bar').style.width = `${(idx/questions.length)*100}%`;
+ 
+    const area = document.getElementById('q-input-area');
+    area.innerHTML='';
+ 
+    if(q.type==='slider'){
+      const curVal = answers[q.key] !== undefined ? answers[q.key] : q.val;
+      area.innerHTML=`
+        <div class="slider-section">
+          <div class="slider-value-display">
+            <span class="slider-val" id="sv">${curVal}</span>
+            <span class="slider-unit">${q.unit}</span>
+          </div>
+          <div class="slider-label-row">
+            ${q.labels.map(l=>`<span>${l}</span>`).join('')}
+          </div>
+          <input type="range" min="${q.min}" max="${q.max}" value="${curVal}"
+            oninput="updateSlider(this,${q.min},${q.max},'${q.key}')" />
+        </div>`;
+      updateSlider(area.querySelector('input'),q.min,q.max,q.key);
+    } else {
+      const saved = answers[q.key];
+      area.innerHTML=`<div class="option-grid">
+        ${q.options.map(o=>`
+          <button class="opt-btn ${saved===o.val?'selected':''}" onclick="selectOpt(this,${o.val},'${q.key}')">
+            <span class="opt-num">${o.num}</span>
+            ${o.label.replace('\n','<br>')}
+          </button>`).join('')}
+      </div>`;
+    }
+ 
+    card.style.transition = 'all 0.5s cubic-bezier(0.4,0,0.2,1)';
+    card.style.opacity='1';
+    card.style.transform='rotateY(0deg) scale(1)';
+  },200);
+}
+ 
+function updateSlider(el,mn,mx,key){
+  const v=parseInt(el.value);
+  answers[key]=v;
+  const sv=document.getElementById('sv');
+  if(sv) sv.textContent=v;
+  const pct=(v-mn)/(mx-mn);
+  const h = 190 - pct*150;
+  if(sv) sv.style.color=`hsl(${h},100%,60%)`;
+  if(sv) sv.style.textShadow=`0 0 20px hsl(${h},100%,60%)`;
+  el.style.background=`linear-gradient(to right, hsl(${h},100%,50%) 0%, hsl(${h},100%,50%) ${pct*100}%, rgba(255,255,255,0.1) ${pct*100}%)`;
+}
+ 
+function selectOpt(el,val,key){
+  answers[key]=val;
+  el.closest('.option-grid').querySelectorAll('.opt-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+ 
+function nextQuestion(){
+  const q=questions[currentQ];
+  if(answers[q.key]===undefined){
+    if(q.type==='slider') answers[q.key]=q.val;
+    else { alert('Please select an option.'); return; }
+  }
+  currentQ++;
+  if(currentQ<questions.length){
+    loadQuestion(currentQ);
+  } else {
+    runAnalysis();
+  }
+}
+ 
+// ===================== ANALYSIS =====================
+const loadMsgs=[
+  'SCANNING NEURAL PATTERNS...',
+  'COMPUTING BURNOUT INDEX...',
+  'RUNNING RISK ALGORITHMS...',
+  'GENERATING RECOVERY PLAN...',
+  'ALMOST DONE...'
+];
+ 
+function runAnalysis(){
+  showScreen('loading-screen');
+  let mi=0;
+  const lt=document.getElementById('loading-text');
+  const intv=setInterval(()=>{
+    if(lt) lt.textContent=loadMsgs[mi%loadMsgs.length];
+    mi++;
+  },600);
+ 
+  // Animate loading orb
+  const lc=document.getElementById('orb-canvas-load');
+  if(lc){ animateLoadOrb(lc); }
+ 
+  setTimeout(()=>{
+    clearInterval(intv);
+    const score=calculateScore();
+    showResults(score);
+  },3200);
+}
+ 
+function animateLoadOrb(canvas){
+  const ctx=canvas.getContext('2d');
+  let t=0;
+  function draw(){
+    if(!document.getElementById('loading-screen').classList.contains('active')) return;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    const cx=canvas.width/2, cy=canvas.height/2, r=40;
+    const g=ctx.createRadialGradient(cx,cy,5,cx,cy,r);
+    g.addColorStop(0,'rgba(0,200,255,0.9)');
+    g.addColorStop(0.5,'rgba(100,50,255,0.6)');
+    g.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=g;
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();
+ 
+    // Orbiting dots
+    for(let i=0;i<3;i++){
+      const a=t+i*(Math.PI*2/3);
+      const dx=Math.cos(a)*50, dy=Math.sin(a)*30;
+      ctx.beginPath();ctx.arc(cx+dx,cy+dy,4,0,Math.PI*2);
+      ctx.fillStyle=`hsla(${190+i*60},100%,70%,0.8)`;ctx.fill();
+    }
+    t+=0.06;
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+ 
+function calculateScore(){
+  let s=0;
+  const sleep=answers.sleep||7;
+  const meals=answers.meals||0;
+  const anxiety=answers.anxiety||1;
+  const focus=answers.focus||1;
+  const negative=answers.negative||1;
+ 
+  if(sleep<=3) s+=25; else if(sleep<=5) s+=14; else if(sleep<=6) s+=6;
+  s+=meals*14;
+  s+=(anxiety-1)*12;
+  s+=(focus-1)*9;
+  s+=(negative-1)*9;
+ 
+  return Math.min(100,Math.max(0,s));
+}
+ 
+function showResults(score){
+  showScreen('result-screen');
+  document.getElementById('result-screen').scrollTop=0;
+  window.scrollTo(0,0);
+ 
+  const level = score<=30?'GREEN': score<=55?'YELLOW': score<=75?'ORANGE':'RED';
+  const colors={GREEN:'#00ff88',YELLOW:'#ffcc00',ORANGE:'#ff8800',RED:'#ff2244'};
+  const col=colors[level];
+ 
+  // Animate score counter
+  let n=0;
+  const el=document.getElementById('res-score');
+  const timer=setInterval(()=>{
+    n+=Math.ceil((score-n)/8)||1;
+    if(n>=score){n=score;clearInterval(timer);}
+    el.textContent=n;
+    el.style.color=col;
+    el.style.textShadow=`0 0 40px ${col}`;
+  },30);
+ 
+  // Badge
+  const badge=document.getElementById('res-badge');
+  const labels={GREEN:'OPTIMAL — You Are Ready',YELLOW:'MILD STRESS — Act Now',ORANGE:'BURNOUT WARNING — Rest Needed',RED:'CRITICAL — Stop & Recover'};
+  badge.textContent=labels[level];
+  badge.style.background=`${col}22`;
+  badge.style.border=`1px solid ${col}44`;
+  badge.style.color=col;
+  badge.style.boxShadow=`0 0 30px ${col}33`;
+ 
+  // Gauge
+  setTimeout(()=>{
+    const gf=document.getElementById('gauge-fill');
+    gf.style.width=score+'%';
+    const gg=gf;
+    if(score<=30) gg.style.background='linear-gradient(90deg,#00ff8888,#00ff88)';
+    else if(score<=55) gg.style.background='linear-gradient(90deg,#ffcc0088,#ffcc00)';
+    else if(score<=75) gg.style.background='linear-gradient(90deg,#ff880088,#ff8800)';
+    else gg.style.background='linear-gradient(90deg,#ff224488,#ff2244)';
+    gf.style.boxShadow=`0 0 15px ${col}`;
+  },400);
+ 
+  // Orb
+  const oc=document.getElementById('orb-canvas');
+  if(oc) drawResultOrb(oc,col,score);
+ 
+  // Analysis cards
+  buildAnalysisCards(score,col);
+ 
+  // Advice
+  buildAdvice(level);
+ 
+  // Plan
+  buildPlan(level,score);
+}
+ 
+function drawResultOrb(canvas,col,score){
+  const ctx=canvas.getContext('2d');
+  const cx=canvas.width/2, cy=canvas.height/2;
+  let t=0;
+  function draw(){
+    if(!document.getElementById('result-screen').classList.contains('active')) return;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+ 
+    // Pulsing glow
+    const pulse=0.85+Math.sin(t*2)*0.15;
+    const r=75*pulse;
+    const g=ctx.createRadialGradient(cx,cy,10,cx,cy,r);
+    g.addColorStop(0,col+'cc');
+    g.addColorStop(0.4,col+'44');
+    g.addColorStop(1,'transparent');
+    ctx.fillStyle=g;
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();
+ 
+    // Brain pattern lines
+    ctx.strokeStyle=col+'55';
+    ctx.lineWidth=1;
+    for(let i=0;i<6;i++){
+      const a=t+i*(Math.PI/3);
+      const x1=cx+Math.cos(a)*30, y1=cy+Math.sin(a)*30;
+      const x2=cx+Math.cos(a+0.5)*70, y2=cy+Math.sin(a+0.5)*70;
+      ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+    }
+ 
+    // Orbiting electrons
+    for(let i=0;i<4;i++){
+      const a=t*1.5+i*(Math.PI/2);
+      const orbitR=82;
+      const ex=cx+Math.cos(a)*orbitR, ey=cy+Math.sin(a)*orbitR;
+      ctx.beginPath();ctx.arc(ex,ey,4,0,Math.PI*2);
+      ctx.fillStyle=`${col}cc`;ctx.fill();
+ 
+      // Trail
+      for(let j=1;j<=5;j++){
+        const ta=a-j*0.15;
+        const tx=cx+Math.cos(ta)*orbitR, ty=cy+Math.sin(ta)*orbitR;
+        ctx.beginPath();ctx.arc(tx,ty,2-j*0.25,0,Math.PI*2);
+        ctx.fillStyle=`${col}${Math.floor((1-j/6)*100).toString(16).padStart(2,'0')}`;
+        ctx.fill();
+      }
+    }
+ 
+    // Score text in orb
+    ctx.fillStyle='#fff';
+    ctx.font=`900 36px Orbitron,monospace`;
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    ctx.shadowColor=col;ctx.shadowBlur=15;
+    ctx.fillText(score,cx,cy-6);
+    ctx.font=`400 9px Orbitron,monospace`;
+    ctx.fillStyle='rgba(255,255,255,0.5)';
+    ctx.shadowBlur=0;
+    ctx.fillText('SCORE',cx,cy+14);
+ 
+    t+=0.02;
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+ 
+// ===================== ANALYSIS CARDS =====================
+function buildAnalysisCards(score,col){
+  const sleep=answers.sleep||7;
+  const meals=answers.meals||0;
+  const anxiety=answers.anxiety||1;
+  const focus=answers.focus||1;
+  const neg=answers.negative||1;
+ 
+  const sleepOk = sleep>=7;
+  const mealsOk = meals===0;
+  const anxOk = anxiety<=2;
+  const focOk = focus<=2;
+ 
+  const cards=[
+    {
+      icon:'😴',
+      title:'Sleep Quality',
+      val:`${sleep} hours`,
+      bar:Math.min(100,(sleep/9)*100),
+      barcol:sleepOk?'#00ff88':'#ff2244',
+      tip: sleep>=7?'Good sleep — memory consolidation happening.' : sleep>=5?'Sleep debt building. Aim for 7+ hours tonight.':'Critical sleep deprivation. Your brain cannot process new info.'
+    },
+    {
+      icon:'🍽️',
+      title:'Nutrition Status',
+      val:meals===0?'On Track':`${meals} meal${meals>1?'s':''} skipped`,
+      bar:Math.max(0,100-meals*33),
+      barcol:mealsOk?'#00ff88':'#ff8800',
+      tip:meals===0?'Eating well supports focus and memory.' : meals===1?'One missed meal slows brain function by 13%.':'Severe nutrition deficit. Eat before studying more.'
+    },
+    {
+      icon:'😰',
+      title:'Anxiety Index',
+      val:['—','Calm','Mild','Moderate','High'][anxiety],
+      bar:(anxiety/4)*100,
+      barcol:anxOk?'#00ff88':anxiety===3?'#ff8800':'#ff2244',
+      tip:anxiety<=2?'Healthy stress level — use it as motivation.':anxiety===3?'Do 4-7-8 breathing now before continuing.':'Fight-or-flight mode. You cannot learn in this state.'
+    },
+    {
+      icon:'🎯',
+      title:'Focus Score',
+      val:['—','Sharp','Good','Drifting','Lost'][focus],
+      bar:Math.max(0,100-(focus-1)*33),
+      barcol:focOk?'#00ff88':focus===3?'#ff8800':'#ff2244',
+      tip:focus<=2?'Focus is intact — use timed 50-min blocks.':focus===3?'Try 25-min Pomodoro sessions instead of long blocks.':'Brain is overwhelmed. Rest first, study second.'
+    },
+    {
+      icon:'💭',
+      title:'Thought Patterns',
+      val:['—','Clear','Mild neg','Frequent','Spiral'][neg],
+      bar:(neg/4)*100,
+      barcol:neg<=2?'#00ff88':neg===3?'#ff8800':'#ff2244',
+      tip:neg<=2?'Positive mindset — keep this going.':neg===3?'Write 3 evidence-based reasons you CAN succeed.':'Cognitive distortion detected. Talk to someone today.'
+    },
+    {
+      icon:'📊',
+      title:'Overall Risk',
+      val:score<=30?'Low':score<=55?'Moderate':score<=75?'High':'Critical',
+      bar:score,
+      barcol:col,
+      tip:score<=30?'You are ready. Maintain this routine.':score<=55?'Minor adjustments needed — see advice below.':score<=75?'Significant burnout. Follow recovery plan strictly.':'Emergency recovery mode required immediately.'
+    }
+  ];
+ 
+  const grid=document.getElementById('analysis-grid');
+  grid.innerHTML=cards.map((c,i)=>`
+    <div class="analysis-card" style="animation-delay:${i*0.1}s;border-color:${c.barcol}22;">
+      <span class="a-card-icon">${c.icon}</span>
+      <div class="a-card-title">${c.title}</div>
+      <div class="a-card-val" style="color:${c.barcol}">${c.val}</div>
+      <div class="a-mini-bar">
+        <div class="a-mini-fill" id="mf-${i}" style="width:0%;background:${c.barcol};"></div>
+      </div>
+      <div class="a-card-tip">${c.tip}</div>
+    </div>
+  `).join('');
+ 
+  setTimeout(()=>{
+    cards.forEach((c,i)=>{
+      const el=document.getElementById(`mf-${i}`);
+      if(el) el.style.width=c.bar+'%';
+    });
+  },600);
+}
+ 
+// ===================== ADVICE =====================
+function buildAdvice(level){
+  const adviceMap={
+    GREEN:[
+      {icon:'✅',col:'#00ff88',text:`Great work, ${studentName}! You are managing exam stress well. Maintain your sleep schedule.`},
+      {icon:'📅',col:'#00ff88',text:'Continue 90-min study blocks with 15-min breaks. Your rhythm is working.'},
+      {icon:'🥗',col:'#00ff88',text:'Keep eating regular meals. Brain performance depends on glucose levels.'},
+      {icon:'🌟',col:'#00ff88',text:'You are ahead of 70% of students. Just keep doing what you are doing.'}
+    ],
+    YELLOW:[
+      {icon:'⚠️',col:'#ffcc00',text:`${studentName}, mild burnout is starting. Catch it now before it escalates.`},
+      {icon:'😴',col:'#ffcc00',text:'Sleep by 11:00 PM tonight — non-negotiable. One good night outweighs 3 tired nights.'},
+      {icon:'🍽️',col:'#ffcc00',text:'Set a meal alarm. Even bread + chai counts. Do not study on an empty stomach.'},
+      {icon:'👨‍👩‍👧',col:'#ffcc00',text:'Spend 15 minutes talking to a family member tonight — not about exams.'}
+    ],
+    ORANGE:[
+      {icon:'🚨',col:'#ff8800',text:`${studentName}, your body and mind are sending clear warning signals. Act today.`},
+      {icon:'🛑',col:'#ff8800',text:'Take the next 2 hours completely OFF. No books, no phone notes, no revision.'},
+      {icon:'🌬️',col:'#ff8800',text:'4-7-8 breathing RIGHT NOW: Inhale 4 sec → Hold 7 sec → Exhale 8 sec. Repeat 4 times.'},
+      {icon:'📖',col:'#ff8800',text:'Tomorrow: study ONE subject only. Not five. Depth over breadth when stressed.'},
+      {icon:'📞',col:'#ff8800',text:'Tell one person how you feel today. Keeping it inside multiplies the pressure.'}
+    ],
+    RED:[
+      {icon:'🆘',col:'#ff2244',text:`${studentName}, this is a critical burnout state. Stop studying immediately.`},
+      {icon:'🍛',col:'#ff2244',text:'Eat a full meal RIGHT NOW before doing anything else. Starvation shuts down cognition.'},
+      {icon:'🛏️',col:'#ff2244',text:'Sleep 8-9 hours tonight. Set the alarm. This is medical advice, not a suggestion.'},
+      {icon:'👩‍⚕️',col:'#ff2244',text:'Talk to a parent, teacher, or counsellor TODAY. This level of distress needs support.'},
+      {icon:'📱',col:'#ff2244',text:'Free helpline: Umang Pakistan — 0317-4288665. Confidential, free, available now.'},
+      {icon:'💙',col:'#ff2244',text:'One exam grade does not determine your future. Your worth is not your marks.'}
+    ]
+  };
+ 
+  const panel=document.getElementById('advice-panel');
+  const advices=adviceMap[level];
+  const colMap={GREEN:'#00ff88',YELLOW:'#ffcc00',ORANGE:'#ff8800',RED:'#ff2244'};
+  const col=colMap[level];
+ 
+  panel.innerHTML=`<h3>Personalised Advice — ${studentName}</h3>
+  <ul class="advice-list">
+    ${advices.map((a,i)=>`
+      <li style="border-left-color:${a.col};animation-delay:${0.1+i*0.12}s;">
+        <span class="ai">${a.icon}</span>
+        <span>${a.text}</span>
+      </li>`).join('')}
+  </ul>`;
+}
+ 
+// ===================== PLAN =====================
+function buildPlan(level,score){
+  const plans={
+    GREEN:[
+      {time:'6:00 AM',text:'Wake up — 10 min light stretching'},
+      {time:'6:30 AM',text:'Fajr + review previous day notes (30 min)'},
+      {time:'8:00 AM',text:'First study block — 90 minutes, one subject'},
+      {time:'10:00 AM',text:'Breakfast break — full meal, no phone'},
+      {time:'11:00 AM',text:'Second study block — 90 minutes'},
+      {time:'1:00 PM',text:'Lunch + Zuhr prayer + 30 min rest'},
+      {time:'3:00 PM',text:'Third study block — 90 minutes'},
+      {time:'5:00 PM',text:'Walk outside — no books, fresh air'},
+      {time:'7:00 PM',text:'Light revision — notes only, no new topics'},
+      {time:'10:30 PM',text:'SLEEP — 7-8 hours minimum'}
+    ],
+    YELLOW:[
+      {time:'TODAY',text:'Cap study at 6 hours max — quality over quantity'},
+      {time:'LUNCH',text:'20-min power nap after Zuhr — set an alarm'},
+      {time:'MEALS',text:'3 full meals — breakfast, lunch, dinner — no skipping'},
+      {time:'EVENING',text:'15 min chai with family — talk about anything but exams'},
+      {time:'PHONE',text:'Off during study blocks, only on during breaks'},
+      {time:'10:30 PM',text:'In bed — eyes closed — alarm set for 6:30 AM'}
+    ],
+    ORANGE:[
+      {time:'RIGHT NOW',text:'Close books. Take a 2-hour complete break.'},
+      {time:'NEXT',text:'Eat something — even if not hungry. Brain needs glucose.'},
+      {time:'TONIGHT',text:'Sleep at 10:30 PM. 8 full hours.'},
+      {time:'TOMORROW',text:'4 hours of study max. ONE subject only.'},
+      {time:'THIS WEEK',text:'Tell one trusted person how you are feeling.'},
+      {time:'DAILY',text:'10 min walk outside — without phone — every day'}
+    ],
+    RED:[
+      {time:'IMMEDIATELY',text:'Stop studying. Close everything. Right now.'},
+      {time:'NEXT 30 MIN',text:'Eat a full cooked meal — not snacks.'},
+      {time:'TONIGHT',text:'9 hours of sleep. No alarm for tomorrow morning.'},
+      {time:'TOMORROW',text:'Wake naturally. Light walk. NO studying until noon.'},
+      {time:'TOMORROW PM',text:'1 hour of lightest material only. Then stop.'},
+      {time:'THIS WEEK',text:'Speak to parents or a teacher. You need real support.'},
+      {time:'HELPLINE',text:'Umang Pakistan: 0317-4288665 — free, confidential'}
+    ]
+  };
+ 
+  const colMap={GREEN:'#00ff88',YELLOW:'#ffcc00',ORANGE:'#ff8800',RED:'#ff2244'};
+ 
+  const wrap=document.getElementById('plan-wrap');
+  wrap.innerHTML=`<h3>Your Recovery Timeline</h3>
+  <div class="timeline">
+    ${plans[level].map((p,i)=>`
+      <div class="t-item" style="animation-delay:${0.1+i*0.1}s;">
+        <div class="t-time">${p.time}</div>
+        <div class="t-text">${p.text}</div>
+      </div>`).join('')}
+  </div>`;
+}
+ 
+// ===================== UTILS =====================
+function restartAssessment(){
+  currentQ=0; answers={};
+  showScreen('question-screen');
+  loadQuestion(0);
+}
+ 
+function shareResult(){
+  const score=document.getElementById('res-score').textContent;
+  const badge=document.getElementById('res-badge').textContent;
+  const text=`ExamStress Coach Report\nStudent: ${studentName}\nBurnout Score: ${score}/100\nStatus: ${badge}\n\nGenerated by ExamStress Coach 3D`;
+  navigator.clipboard.writeText(text).then(()=>{
+    alert('Results copied to clipboard!');
+  }).catch(()=>{
+    alert(`Score: ${score}/100 | Status: ${badge}`);
+  });
+}
+ 
+// Enter key to start
+document.getElementById('student-name').addEventListener('keydown',e=>{
+  if(e.key==='Enter') startAssessment();
+});
+</script>
+</body>
+</html>
+ 
