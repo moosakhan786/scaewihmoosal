@@ -575,7 +575,8 @@ function getBirthdayTarget(){
 
 function isBirthdayNow(){
   
-  return true;
+const now=new Date();
+  return now.getMonth()===5 && now.getDate()===9;
 }
 
 // ════════════════════
