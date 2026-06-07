@@ -326,6 +326,52 @@ body{background:var(--black);color:var(--white);font-family:'Montserrat',sans-se
   .cd-blocks{gap:.8rem;}
   .cd-block{padding:1rem 1.2rem;min-width:70px;}
 }
+
+  #lock-screen{
+  position:fixed;
+  inset:0;
+  z-index:9000;
+  background:rgba(0,0,0,.92);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+}
+
+.lock-box{
+  padding:2.5rem;
+  border:1px solid rgba(255,45,120,.2);
+  border-radius:20px;
+  background:rgba(255,45,120,.05);
+  backdrop-filter:blur(10px);
+}
+
+.lock-icon{
+  font-size:3rem;
+  margin-bottom:1rem;
+}
+
+.lock-title{
+  font-size:1.5rem;
+  color:var(--rose);
+  margin-bottom:.5rem;
+  font-family:'Playfair Display',serif;
+}
+
+.lock-msg{
+  color:rgba(255,255,255,.6);
+  margin-bottom:1.5rem;
+}
+
+#continueBtn{
+  padding:.8rem 2rem;
+  border:none;
+  border-radius:50px;
+  cursor:pointer;
+  background:linear-gradient(135deg,var(--pink),var(--plum));
+  color:white;
+}
+  
 </style>
 </head>
 <body>
@@ -341,8 +387,27 @@ body{background:var(--black);color:var(--white);font-family:'Montserrat',sans-se
   <div class="ld-bar"><div class="ld-fill"></div></div>
 </div>
 
+
+<!-- LOCK SCREEN -->
+<div id="lock-screen" style="display:none;">
+  <div class="lock-box">
+    <div class="lock-icon">🔒</div>
+    <div class="lock-title">Content Locked</div>
+    <div class="lock-msg">
+      Wait until unlock is complete to continue.
+    </div>
+
+    <button id="continueBtn" style="display:none;" onclick="unlockAndEnter()">
+      Continue →
+    </button>
+  </div>
+</div>
+
+  
 <!-- BACKGROUND STARS -->
 <canvas id="starCanvas"></canvas>
+
+
 
 <!-- ══════════════════════
      COUNTDOWN SCREEN
@@ -637,14 +702,31 @@ window.addEventListener('load',()=>{
 // ════════════════════
 function initApp(){
   if(isBirthdayNow()){
-    // It IS her birthday — go straight to story
+    // SHOW LOCK FIRST (not story yet)
     document.getElementById('countdown-screen').style.display='none';
-    showStory();
+    showLockScreen();
   } else {
-    // Show countdown
     startCountdown();
     spawnCdHearts();
   }
+}
+
+  function showLockScreen(){
+  document.getElementById('lock-screen').style.display='flex';
+
+  // simulate unlock delay (or replace with real check)
+  setTimeout(()=>{
+    document.getElementById('continueBtn').style.display='inline-block';
+  }, 3000); // 3 sec lock delay
+}
+
+  function unlockAndEnter(){
+  const audio = document.getElementById('bgMusic');
+  audio.volume = 0.25;
+  audio.play().catch(()=>{});
+
+  document.getElementById('lock-screen').style.display='none';
+  showStory();
 }
 
 // ════════════════════
