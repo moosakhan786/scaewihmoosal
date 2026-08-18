@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Moosa Khan — Performance Marketing & E-Commerce</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#06091A;
+  --card:#0D1226;
+  --card2:#131829;
+  --amber:#F5A623;
+  --blue:#4F8EF7;
+  --text:#EDF0F7;
+  --muted:#8993AB;
+  --border:#1C2238;
+}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+  line-height:1.5;
+}
+
+.page{
+  width:900px;
+  max-width:calc(100% - 30px);
+  margin:auto;
+  padding:25px 0 50px;
+}
+
+/* DOWNLOAD */
+.download{
+  text-align:right;
+  margin-bottom:15px;
+}
+
+.download button{
+  background:var(--amber);
+  color:#111;
+  border:0;
+  padding:10px 18px;
+  border-radius:8px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.download button:hover{
+  opacity:.9;
+}
+
+/* HERO */
+.hero{
+  background:
+    radial-gradient(circle at 90% 10%,rgba(245,166,35,.13),transparent 30%),
+    linear-gradient(135deg,#0D1226,#071025);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:35px;
+  margin-bottom:18px;
+}
+
+.hero-top{
+  display:flex;
+  justify-content:space-between;
+  gap:25px;
+}
+
+.name{
+  font-size:46px;
+  font-weight:800;
+  letter-spacing:-2px;
+}
+
+.name span{color:var(--amber)}
+
+.title{
+  margin-top:8px;
+  color:var(--amber);
+  font-size:12px;
+  letter-spacing:1.5px;
+  font-weight:700;
+}
+
+.contact{
+  text-align:right;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.8;
+}
+
+.contact a{
+  color:var(--blue);
+  text-decoration:none;
+}
+
+/* MIND MAP */
+.mindmap{
+  position:relative;
+  height:360px;
+  margin-top:28px;
+}
+
+.center{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:180px;
+  height:180px;
+  border-radius:50%;
+  background:
+    radial-gradient(circle,#18203D,#0B1125);
+  border:2px solid var(--amber);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  box-shadow:0 0 45px rgba(245,166,35,.12);
+  z-index:3;
+}
+
+.center strong{
+  font-size:22px;
+}
+
+.center small{
+  color:var(--amber);
+  font-size:9px;
+  letter-spacing:1px;
+  margin-top:5px;
+}
+
+.node{
+  position:absolute;
+  width:175px;
+  padding:15px;
+  background:var(--card2);
+  border:1px solid var(--border);
+  border-radius:12px;
+  text-align:center;
+  z-index:2;
+}
+
+.node b{
+  display:block;
+  color:var(--amber);
+  font-size:12px;
+  margin-bottom:4px;
+}
+
+.node span{
+  color:var(--muted);
+  font-size:10px;
+}
+
+/* node positions */
+.n1{left:0;top:25px}
+.n2{right:0;top:25px}
+.n3{left:0;bottom:25px}
+.n4{right:0;bottom:25px}
+.n5{left:50%;top:0;transform:translateX(-50%)}
+
+.mindmap:before,
+.mindmap:after{
+  content:"";
+  position:absolute;
+  background:var(--border);
+  z-index:1;
+}
+
+.mindmap:before{
+  width:65%;
+  height:1px;
+  left:17.5%;
+  top:50%;
+}
+
+.mindmap:after{
+  width:1px;
+  height:75%;
+  left:50%;
+  top:12.5%;
+}
+
+/* METRICS */
+.metrics{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin-top:20px;
+}
+
+.metric{
+  background:rgba(245,166,35,.08);
+  border:1px solid rgba(245,166,35,.2);
+  border-radius:10px;
+  padding:13px;
+}
+
+.metric strong{
+  display:block;
+  color:var(--amber);
+  font-size:22px;
+}
+
+.metric span{
+  color:var(--muted);
+  font-size:10px;
+}
+
+/* CARDS */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:25px;
+  margin-top:18px;
+}
+
+.heading{
+  color:var(--amber);
+  font-size:11px;
+  letter-spacing:1.7px;
+  font-weight:800;
+  margin-bottom:18px;
+}
+
+/* EXPERIENCE */
+.exp{
+  display:grid;
+  grid-template-columns:190px 1fr;
+  gap:20px;
+  padding:16px 0;
+  border-top:1px solid var(--border);
+}
+
+.exp:first-of-type{
+  border-top:0;
+}
+
+.exp h3{
+  font-size:14px;
+}
+
+.exp .brand{
+  color:var(--amber);
+  font-size:11px;
+  font-weight:700;
+  margin-bottom:4px;
+}
+
+.exp .date{
+  color:var(--muted);
+  font-size:10px;
+}
+
+.exp p{
+  color:#A5AEC2;
+  font-size:11px;
+}
+
+.result{
+  display:inline-block;
+  margin-top:8px;
+  margin-right:5px;
+  padding:5px 8px;
+  background:rgba(79,142,247,.08);
+  border:1px solid rgba(79,142,247,.18);
+  color:#7BB8FF;
+  border-radius:6px;
+  font-size:9px;
+}
+
+/* SKILLS */
+.skills{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+
+.skill{
+  background:var(--card2);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:12px;
+}
+
+.skill b{
+  display:block;
+  color:var(--amber);
+  font-size:10px;
+  margin-bottom:5px;
+}
+
+.skill span{
+  color:var(--muted);
+  font-size:10px;
+}
+
+/* BOTTOM */
+.bottom{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+}
+
+/* PRINT */
+@media print{
+
+  @page{
+    size:A4;
+    margin:10mm;
+  }
+
+  body{
+    background:#fff;
+  }
+
+  .page{
+    width:100%;
+    max-width:none;
+    padding:0;
+  }
+
+  .download{
+    display:none;
+  }
+
+  .hero,
+  .card{
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+
+  .hero{
+    break-inside:avoid;
+  }
+
+  .card{
+    break-inside:avoid;
+  }
+}
+
+@media(max-width:650px){
+
+  .hero-top{
+    flex-direction:column;
+  }
+
+  .contact{
+    text-align:left;
+  }
+
+  .name{
+    font-size:36px;
+  }
+
+  .metrics{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .mindmap{
+    height:500px;
+  }
+
+  .center{
+    width:145px;
+    height:145px;
+  }
+
+  .node{
+    width:135px;
+  }
+
+  .n1{left:0;top:50px}
+  .n2{right:0;top:50px}
+  .n3{left:0;bottom:50px}
+  .n4{right:0;bottom:50px}
+  .n5{top:190px}
+
+  .exp{
+    grid-template-columns:1fr;
+    gap:5px;
+  }
+
+  .skills{
+    grid-template-columns:1fr 1fr;
+  }
+
+.download {
+  display: none;
+}
+
+  .bottom{
+    grid-template-columns:1fr;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="page">
+
+<div class="download">
+  <button onclick="window.print()">⬇ Download / Save as PDF</button>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+
+  <div class="hero-top">
+
+    <div>
+      <div class="name">Moosa<span>.</span></div>
+
+      <div class="title">
+        PERFORMANCE MARKETING · META ADS · E-COMMERCE
+      </div>
+    </div>
+
+    <div class="contact">
+      📱 +92 310 3556217<br>
+      📍 Lahore, Pakistan<br>
+      <a href="https://safisure.com">safisure.com</a><br>
+      <a href="https://maasadqay.com">maasadqay.com</a>
+    </div>
+
+  </div>
+
+
+  <!-- VISUAL MIND MAP -->
+
+  <div class="mindmap">
+
+    <div class="node n1">
+      <b>META ADS</b>
+      <span>Strategy · Targeting · Testing</span>
+    </div>
+
+    <div class="node n2">
+      <b>SHOPIFY</b>
+      <span>Liquid · CRO · UX · COD</span>
+    </div>
+
+    <div class="node n3">
+      <b>CREATIVE</b>
+      <span>UGC · Hooks · Copy · Scripts</span>
+    </div>
+
+    <div class="node n4">
+      <b>GROWTH</b>
+      <span>ROAS · Funnels · Conversion</span>
+    </div>
+
+    <div class="node n5">
+      <b>TECH + AI</b>
+      <span>Next.js · APIs · AI Creative</span>
+    </div>
+
+    <div class="center">
+      <strong>MOOSA</strong>
+      <small>MARKETER + BUILDER</small>
+    </div>
+
+  </div>
+
+
+  <div class="metrics">
+
+    <div class="metric">
+      <strong>10.05×</strong>
+      <span>Peak ROAS</span>
+    </div>
+
+    <div class="metric">
+      <strong>6.46×</strong>
+      <span>Blended ROAS</span>
+    </div>
+
+    <div class="metric">
+      <strong>₨651</strong>
+      <span>Cost / Purchase</span>
+    </div>
+
+    <div class="metric">
+      <strong>3+</strong>
+      <span>Years Shopify</span>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- PROFILE -->
+
+<section class="card">
+
+<div class="heading">01 · PROFILE</div>
+
+<p style="color:#A5AEC2;font-size:12px;line-height:1.8">
+Performance marketer and e-commerce builder with hands-on experience in
+Meta Ads, Shopify, creative strategy and conversion optimization.
+Focused on building and scaling Pakistani D2C/COD businesses through
+better ads, better stores and better customer communication.
+</p>
+
+</section>
+
+
+<!-- EXPERIENCE -->
+
+<section class="card">
+
+<div class="heading">02 · EXPERIENCE</div>
+
+
+<div class="exp">
+
+<div>
+<div class="brand">SAFISURE</div>
+<h3>Founder & Performance Marketer</h3>
+<div class="date">June 2026 – Present</div>
+</div>
+
+<div>
+<p>
+Built the brand from product concept to Shopify launch and paid acquisition.
+Manage Meta campaigns, creative testing and optimization while developing
+UGC concepts, Urdu scripts and conversion-focused store improvements.
+</p>
+
+<span class="result">₨651 Cost / Purchase</span>
+<span class="result">Meta Ads</span>
+<span class="result">Shopify CRO</span>
+</div>
+
+</div>
+
+
+<div class="exp">
+
+<div>
+<div class="brand">MAASADQAY</div>
+<h3>Founder & Performance Marketer</h3>
+<div class="date">2023 – Present</div>
+</div>
+
+<div>
+<p>
+Manage paid media, Shopify development and marketing strategy.
+Restructured campaigns around the full funnel and worked on COD,
+checkout and conversion optimization.
+</p>
+
+<span class="result">10.05× Peak ROAS</span>
+<span class="result">6.46× Blended ROAS</span>
+<span class="result">7 Campaigns</span>
+</div>
+
+</div>
+
+
+<div class="exp">
+
+<div>
+<div class="brand">FREELANCE</div>
+<h3>Meta Ads & E-Commerce Consultant</h3>
+<div class="date">July 2023 – Present</div>
+</div>
+
+<div>
+<p>
+Worked with Pakistani D2C products across beauty, hair care, fashion,
+electronics, kitchen/home and lifestyle. Built Shopify stores, ad
+creatives, landing pages and COD-focused trust systems.
+</p>
+
+<span class="result">3.34× ROAS</span>
+<span class="result">~15% Peak Conversion</span>
+<span class="result">&lt;₨800 CPM</span>
+</div>
+
+</div>
+
+</section>
+
+
+<!-- SKILLS -->
+
+<section class="card">
+
+<div class="heading">03 · WHAT I DO</div>
+
+<div class="skills">
+
+<div class="skill">
+<b>PAID MEDIA</b>
+<span>Meta Ads · Targeting · Retargeting · Testing · ROAS · CPM · CPA</span>
+</div>
+
+<div class="skill">
+<b>CREATIVE</b>
+<span>UGC · Hooks · Direct Response · Scripts · A/B Testing</span>
+</div>
+
+<div class="skill">
+<b>SHOPIFY</b>
+<span>Liquid · CRO · Mobile UX · Speed · Product Pages · COD</span>
+</div>
+
+<div class="skill">
+<b>CONTENT</b>
+<span>English · Urdu · Roman Urdu · Ad Copy · Landing Pages</span>
+</div>
+
+<div class="skill">
+<b>AI</b>
+<span>AI Video · AI Images · Prompt Engineering · Claude API</span>
+</div>
+
+<div class="skill">
+<b>DEVELOPMENT</b>
+<span>Next.js · React · Firebase · JavaScript · Shopify API</span>
+</div>
+
+</div>
+
+</section>
+
+
+<!-- PROJECTS -->
+
+<div class="bottom">
+
+<section class="card">
+
+<div class="heading">04 · BUILT</div>
+
+<p style="color:#A5AEC2;font-size:11px;margin-bottom:12px">
+<b style="color:#fff">EcomAI</b><br>
+AI-powered Shopify management SaaS using Next.js, Firebase,
+Shopify Admin API and Claude API.
+</p>
+
+<p style="color:#A5AEC2;font-size:11px">
+<b style="color:#fff">AI Marketing Course</b><br>
+5-session practical course covering Meta Ads, AI creative production
+and Shopify optimization.
+</p>
+
+</section>
+
+
+<section class="card">
+
+<div class="heading">05 · EDUCATION</div>
+
+<h3 style="font-size:13px;margin-bottom:4px">
+BS Software Engineering
+</h3>
+
+<p style="color:#8993AB;font-size:11px">
+University of Lahore<br>
+2023 – Present
+</p>
+
+<br>
+
+<div class="heading">MARKET</div>
+
+<p style="color:#8993AB;font-size:11px">
+Pakistani D2C · COD<br>
+Urdu · Roman Urdu · English
+</p>
+
+</section>
+
+</div>
+
+
+</div>
+
+</body>
+</html>
