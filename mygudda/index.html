@@ -627,22 +627,13 @@ body{background:var(--black);color:var(--white);font-family:'Montserrat',sans-se
 // ════════════════════════════════════════════════
 //  BIRTHDAY TARGET: 9 June of the next occurrence
 // ════════════════════════════════════════════════
-function getBirthdayTarget(){
-  const now=new Date();
-  let yr=now.getFullYear();
-  // June = month index 5; midnight = 00:00:00
-  let target=new Date(yr,5,9,0,0,0,0); // June 9
-  if(now>=target){
-    target=new Date(yr+1,5,9,0,0,0,0);
-  }
-  return target;
+function getBirthdayTarget() {
+  return new Date(); // No waiting for June 9
 }
 
-function isBirthdayNow(){
-  const now=new Date();
-  return now.getMonth()===5 && now.getDate()===9;
+function isBirthdayNow() {
+  return true; // Always show the birthday content
 }
-
 // ════════════════════
 //  CURSOR
 // ════════════════════
